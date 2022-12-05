@@ -1,0 +1,28 @@
+{
+  "canisters": {
+    "ICHUB_backend": {
+      "main": "src/ICHUB_backend/main.mo",
+      "type": "motoko"
+    },
+    "ICHUB_frontend": {
+      "dependencies": [
+        "ICHUB_backend"
+      ],
+      "frontend": {
+        "entrypoint": "src/ICHUB_frontend/src/index.html"
+      },
+      "source": [
+        "src/ICHUB_frontend/assets",
+        "dist/ICHUB_frontend/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "version": 1
+}

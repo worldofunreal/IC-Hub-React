@@ -1,19 +1,26 @@
-import { ICHUB_backend } from "../../declarations/ICHUB_backend";
+import React from 'react';
 
-document.querySelector("form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const button = e.target.querySelector("button");
+import { render } from 'react-dom';
+import { NavLink, Router, Route, Switch } from 'react-router-dom';
+import {createBrowserHistory} from "history";
+import AppProvider from "./context";
+import ChatICAppProvider from "./chatSDK/chatAppContext";
 
-  const name = document.getElementById("name").value.toString();
+import App from "./App";
 
-  button.setAttribute("disabled", true);
+var hist = createBrowserHistory();
 
-  // Interact with foo actor, calling the greet method
-  const greeting = await ICHUB_backend.greet(name);
+document.title = "IC HUB";
 
-  button.removeAttribute("disabled");
-
-  document.getElementById("greeting").innerText = greeting;
-
-  return false;
-});
+render(
+  <ChatICAppProvider>
+    <AppProvider>
+      <Router history={hist}>
+        <Switch>
+          <Route path="/" component={App}></Route>
+        </Switch>
+      </Router>
+    </AppProvider>
+  </ChatICAppProvider>, 
+  document.getElementById("root")
+);

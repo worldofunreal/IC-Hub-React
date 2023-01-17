@@ -1,0 +1,33 @@
+type Username__1 = text;
+type Username = text;
+type UserID__1 = principal;
+type UserID = principal;
+type UserGroups = record {groups: vec GroupData;};
+type UserData = 
+ record {
+   banned: bool;
+   userID: UserID__1;
+   username: Username;
+ };
+type GroupID__1 = nat;
+type GroupID = nat;
+type GroupData = 
+ record {
+   canister: text;
+   groupID: GroupID;
+   isDirect: bool;
+   isPrivate: bool;
+   name: text;
+   owner: principal;
+ };
+type ChatCore = 
+ service {
+   add_user_to_group: (GroupID__1, UserID) -> (bool, text);
+   ban_user: (UserID) -> (bool);
+   create_group: (text, bool, bool) -> (bool, text);
+   create_user_profile: (Username__1) -> (bool);
+   get_user: (UserID) -> (opt UserData) query;
+   get_user_groups: () -> (opt UserGroups) query;
+   initialize: () -> (bool);
+ };
+service : (principal) -> ChatCore

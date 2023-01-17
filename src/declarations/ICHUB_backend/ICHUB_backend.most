@@ -1,0 +1,20 @@
+// Version: 1.0.0
+type AvatarType = {#base64; #none; #url};
+type UserData =
+  {
+    accountID : Blob;
+    avatar : Text;
+    avatarType : AvatarType;
+    hashtag : Text;
+    status : UserStatus;
+    userID : UserID;
+    username : Username
+  };
+type UserData__1 = UserData;
+type UserID = Principal;
+type UserID__1 = UserID;
+type UserStatus = {#active; #banned; #inactive; #incomplete};
+type Username = Text;
+actor {
+  stable var _users : [(UserID__1, UserData__1)]
+};

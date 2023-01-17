@@ -1,0 +1,33 @@
+type Username = text;
+type UserID__1 = principal;
+type UserID = principal;
+type UserData = 
+ record {
+   banned: bool;
+   userID: UserID__1;
+   username: Username;
+ };
+type MessageID = nat;
+type MessageData = 
+ record {
+   "text": text;
+   time: nat32;
+   userID: UserID__1;
+   username: Username;
+ };
+type ChatGroups = 
+ service {
+   add_text_message: (text) -> (bool);
+   get_group_users: () -> (vec record {
+                                 UserID;
+                                 UserData;
+                               }) query;
+   get_messages: () -> (vec record {
+                              MessageID;
+                              MessageData;
+                            }) query;
+   get_total_messages: () -> (MessageID) query;
+   is_user_added: (UserID) -> (bool) query;
+   join_chat: (UserID, UserData) -> (bool);
+ };
+service : (principal) -> ChatGroups

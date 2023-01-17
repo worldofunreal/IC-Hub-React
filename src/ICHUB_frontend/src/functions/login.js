@@ -4,25 +4,18 @@ import { StoicIdentity } from "ic-stoic-identity";
 
 import { idlFactory } from "../../../declarations/ICHUB_backend";
 
-const canisterId = "onhpa-giaaa-aaaak-qaafa-cai";
-const betaCanisterId = "k7h5q-jyaaa-aaaan-qaaaq-cai";
-const whitelist = [canisterId, betaCanisterId];
+const canisterId = "oqnbw-faaaa-aaaag-abcvq-cai";
+const coreCanisterId = "2nfjo-7iaaa-aaaag-qawaq-cai";
+const publicChatCanisterId = "yq4sl-yyaaa-aaaag-aaxcq-cai";
+const usergeekCanister = "fbbjb-oyaaa-aaaah-qaojq-cai";
+const whitelist = [canisterId, coreCanisterId, publicChatCanisterId, usergeekCanister];
 const host = 'https://raw.ic0.app/';
 
 /// INTERNET IDENTITY
-export const loginII = async (setAII) => {
+export const loginII = async () => {
   console.log("Loggin in II");
     const authClient = await AuthClient.create();
-    if (await authClient.isAuthenticated()) {
-      setAII(authClient);
-    } else {
-      console.log("Not authenticated");
-      return await authClient.login({
-        onSuccess: async () => {
-          setAII(authClient);
-        },
-      });
-    }
+    return authClient;
 };
 
 export const handleAuthenticated = async (authClient) => {
@@ -51,7 +44,7 @@ export const loginPlug = async () => {
     let connection = await window.ic.plug.requestConnect({ whitelist });
     console.log("Plug connection:", connection);
     const principalId = await window.ic.plug.agent.getPrincipal();
-    var principal = principalId.toString();
+    var principal = principalId;
     console.log(principal);
     return principal;
 };
@@ -59,24 +52,22 @@ export const loginPlug = async () => {
 /// INFINITY WALLET
 export const loginInfinityWallet = async () => {
   try {
-    const publicKey = await window.ic.infinityWallet.requestConnect({whitelist, host});
-    const principalId = await window.ic.infinityWallet.agent.getPrincipal();
-    var principal = principalId.toString();
-    console.log(principal);
-    return principal;
+    await window?.ic?.infinityWallet?.requestConnect({ whitelist });
+    let _prin = await window.ic.infinityWallet.getPrincipal();
+    return _prin;
   } catch (e) {
-    console.log("e", e);
+    console.log("e1", e);
     alert("Your Infinity Wallet session has expired. Please check your login in the Infinity Wallet app and then reload this page");
   }
 };
 
-export const getCanister = async (identity, idL, canID) => {
-  const _canister = Actor.createActor(idL, {
+export const setCanisterData = async (idl, canisterId, identity) => {
+  const _canister = Actor.createActor(idl, {
     agent: new HttpAgent({
       host: host,
       identity,
     }),
-    canID,
+    canisterId,
   });
   return _canister;
 };

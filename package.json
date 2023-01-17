@@ -10,10 +10,10 @@
   ],
   "scripts": {
     "build": "webpack",
-    "prebuild": "npm run generate",
+    "prebuild": "npm run copy:types",
     "start": "webpack serve --mode development --env development",
-    "prestart": "npm run generate",
-    "generate": "dfx generate ICHUB_backend"
+    "prestart": "npm run copy:types",
+    "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --delete src/declarations"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.14.1",
@@ -45,7 +45,16 @@
     "@dfinity/auth-client": "^0.14.1",
     "@dfinity/authentication": "^0.14.1",
     "@dfinity/identity": "^0.14.1",
+    "css-loader": "^6.7.1",
+    "history": "^5.3.0",
     "ic-stoic-identity": "^2.0.0",
-    "react-unity-webgl": "^8.8.0"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.4",
+    "react-router-dom": "^5.3.0",
+    "react-unity-webgl": "^8.8.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.6",
+    "usergeek-ic-js": "^1.0.4"
   }
 }

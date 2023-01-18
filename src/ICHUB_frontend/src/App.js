@@ -277,7 +277,7 @@ export default function App(props){
     let { identity, setIdentity, canister, setCanister, walletPopup, setWalletPopup, walletService, setWalletService } = useContext(AppContext);
     /// Functions from the Chat context
     let { setUnityApp, setWalletSelected, setCoreCanisterExternal, setUserPrincipal, setIdentityChat, setUsername } = useContext(ChatAppContext);
-
+    /// Local variables
     const [usergeekInitialized, setUsergeekInitialized] = useState(false);
 
     ///////// INITIALIZE /////////

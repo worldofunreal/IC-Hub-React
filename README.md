@@ -93,34 +93,34 @@ This file contains the heavy logic and the functions it contains are:
 
 From the App context
 ```
-    let { identity, setIdentity, canister, setCanister, walletPopup, setWalletPopup, walletService, setWalletService } = useContext(AppContext);
-    /// Functions from the Chat context
-    let { setUnityApp, setWalletSelected, setCoreCanisterExternal, setUserPrincipal, setIdentityChat, setUsername } = useContext(ChatAppContext);
+let { identity, setIdentity, canister, setCanister, walletPopup, setWalletPopup, walletService, setWalletService } = useContext(AppContext);
+/// Functions from the Chat context
+let { setUnityApp, setWalletSelected, setCoreCanisterExternal, setUserPrincipal, setIdentityChat, setUsername } = useContext(ChatAppContext);
 ```
 Local variables
 ```
-    const [usergeekInitialized, setUsergeekInitialized] = useState(false);
+const [usergeekInitialized, setUsergeekInitialized] = useState(false);
 ```
 
 Control functions
 ```
-    unityContext.on("CopyToClipboard", (txt) => {
-        navigator.clipboard.writeText(txt);
-    });
+unityContext.on("CopyToClipboard", (txt) => {
+    navigator.clipboard.writeText(txt);
+});
 ```
 
 Initialize functions
 ```
-    useEffect(() => {
-        setUnityApp(unityContext);
-        initializeUsergeek();
-    }, []);
+useEffect(() => {
+    setUnityApp(unityContext);
+    initializeUsergeek();
+}, []);
 ```
 
 Start Usergeek
 ```
-    initializeUsergeek()
-    setUsergeekPrincipal()
+initializeUsergeek()
+setUsergeekPrincipal()
 ```
 
 The Full login process

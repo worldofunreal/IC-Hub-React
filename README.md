@@ -58,7 +58,7 @@ export const fromHexString = (hex) => {
     return bytes;
 }
 ```
-* IF YOU ARE USING THE ACCOUNTID THIS FUNCTIONS CAN BE REALLY HELPFUL
+*** IF YOU ARE USING THE ACCOUNTID THIS FUNCTIONS CAN BE REALLY HELPFUL ***
 
 `src/functions/login`
 

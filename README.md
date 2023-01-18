@@ -31,6 +31,7 @@ For both type of users:
 ### Project Structure
 
 Here are defined the variables that are going to be used along the rest of the flow
+
 `src/context.js`
 ```
 const [aID, setAID] = useState(null);                     // User's account ID
@@ -41,6 +42,7 @@ const [walletService, setWalletService] = useState(null); // The wallet service 
 ```
 
 This is a helper file containing the functions necessary to interact with the User's account in HexString and Bytes
+
 `src/functions/account.js`
 ```
 export const toHexString = (byteArray) => {

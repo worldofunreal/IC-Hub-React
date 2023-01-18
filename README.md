@@ -198,12 +198,12 @@ public type AccountIdentifier = Blob;
 // 32-byte array.
 public type Subaccount = Blob;
 
-beBytes(n: Nat32) : [Nat8]
-principalToSubaccount(principal : Principal) : Blob
-validateAccountIdentifier(accountIdentifier : AccountIdentifier) : Bool
-getSubaccount(arr : Nat8) : Subaccount
-defaultSubaccount() : Subaccount
-accountIdentifier(principal: Principal, subaccount: Subaccount) : AccountIdentifier
+func beBytes(n: Nat32) : [Nat8]
+func principalToSubaccount(principal : Principal) : Blob
+func validateAccountIdentifier(accountIdentifier : AccountIdentifier) : Bool
+func getSubaccount(arr : Nat8) : Subaccount
+func defaultSubaccount() : Subaccount
+func accountIdentifier(principal: Principal, subaccount: Subaccount) : AccountIdentifier
 ```
 
 `/CRC32.mo`
@@ -212,11 +212,11 @@ Module with functions and data types for interacting with the user's account
 crc32Table : [Nat32]
 seed : Nat32
 
-ofArray(arr : [Nat8]) : Nat32
-ofBlob(blob: Blob) : Nat32
+func ofArray(arr : [Nat8]) : Nat32
+func ofBlob(blob: Blob) : Nat32
 ```
 
-`ledger_interface.mo`
+`/ledger_interface.mo`
 Module wid functions and data type for interacting with the ICP Ledger
 ```
 Interface = actor
@@ -232,3 +232,83 @@ type TransferResult
 type AccountBalanceArgs
 ```
 
+`/SHA224.mo`
+Module with functions and data types for interacting with the user's account
+```
+K : [Nat32]
+S : [Nat32]
+
+func sha224(data : [Nat8]) : [Nat8]
+
+class Digest()
+s = Array.thaw<Nat32>(S)
+x = Array.init<Nat8>(64, 0)
+nx = 0
+len : Nat64 = 0
+func reset()
+func write(data : [Nat8])
+sum() : [Nat8]
+block(data : [Nat8])
+
+rot : (Nat32, Nat32) -> Nat32 = Nat32.bitrotRight
+```
+
+`/types.mo`
+Module for interacting with the core login
+```
+type UserID
+type Username
+type AvatarType
+type UserStatus
+type UserData
+```
+
+`/main.mo`
+Core logic
+
+We declare it's ID
+```
+private let canisterID : Text = "oqnbw-faaaa-aaaag-abcvq-cai";
+```
+
+We declare the Ledger's ID
+```
+private let ledger : Ledger.Interface = actor("ryjl3-tyaaa-aaaaa-aaaba-cai");
+```
+
+Import the types to be used
+```
+type AvatarType     = Types.AvatarType;
+type UserID         = Types.UserID;
+type UserData       = Types.UserData;
+type UserStatus     = Types.UserStatus;
+```
+
+Create a hashmap for the users
+```
+private stable var _users : [(UserID, UserData)] = [];
+var users : HashMap.HashMap<UserID, UserData> = HashMap.fromIter(_users.vals(), 0, Principal.equal, Principal.hash);
+```
+
+Save users after every update
+```
+/// START SYSTEM CALLS
+system func preupgrade() {
+    _users := Iter.toArray(users.entries());
+};
+
+system func postupgrade() {
+    _users := [];
+};
+/// END SYSTEM CALLS
+```
+
+And the main functions
+```
+func createUser(username : Text, hasht : Text) : async Bool
+func setImageToUser(avatarImage : Text, imageType : AvatarType) : async Bool
+query(msg) func getUserData() : async ?UserData
+query(msg) func getUserAvatar() : async (Text, AvatarType)
+func getICPBalance() : async {e8s:Nat64}
+func getUserSubaccount(u : Principal) : Account.AccountIdentifier
+```

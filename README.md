@@ -30,8 +30,8 @@ For both type of users:
 ## Core project
 ### Project Structure
 
-`src/context.js`
 Here are defined the variables that are going to be used along the rest of the flow
+`src/context.js`
 ```
 const [aID, setAID] = useState(null);                     // User's account ID
 const [identity, setIdentity] = useState(null);           // User's Identity
@@ -40,8 +40,8 @@ const [walletPopup, setWalletPopup] = useState(null);     // If wallet selected 
 const [walletService, setWalletService] = useState(null); // The wallet service selected by the user
 ```
 
-`src/functions/account.js`
 This is a helper file containing the functions necessary to interact with the User's account in HexString and Bytes
+`src/functions/account.js`
 ```
 export const toHexString = (byteArray) => {
     return Array.from(byteArray, function(byte) {
@@ -58,8 +58,8 @@ export const fromHexString = (hex) => {
 ```
 * IF YOU ARE USING THE ACCOUNTID THIS FUNCTIONS CAN BE REALLY HELPFUL
 
-`src/functions/login`
 In the login helper we have the functions to login with any of the 4 wallets 
+`src/functions/login`
 ```
 // Internet Identity
 loginII() & handleAuthenticated(authClient)
@@ -82,8 +82,9 @@ setCanisterData(idl, canisterId, identity)
 To check the CatSDK documentation please go to the [github](https://github.com/WorldOfUnreal/chatsdk) of the project
 In this project we will add the ChatSDK and import it's context in App.js
 
-`src/App.js`
 Here is imported the Unity3D build along many of the functions that have connection between Unity3D and React
+`src/App.js`
+
 This file contains the heavy logic and the functions it contains are:
 
 From the App context
@@ -190,8 +191,8 @@ sendProjectsManual()
 # Backend
 ## Core project
 ### Project structure
-`/Account.mo`
 This is a module with functions and data types for interacting with the user's account
+`/Account.mo`
 ```
 // 32-byte array.
 public type AccountIdentifier = Blob;
@@ -206,8 +207,8 @@ func defaultSubaccount() : Subaccount
 func accountIdentifier(principal: Principal, subaccount: Subaccount) : AccountIdentifier
 ```
 
-`/CRC32.mo`
 Module with functions and data types for interacting with the user's account
+`/CRC32.mo`
 ```
 crc32Table : [Nat32]
 seed : Nat32
@@ -216,8 +217,8 @@ func ofArray(arr : [Nat8]) : Nat32
 func ofBlob(blob: Blob) : Nat32
 ```
 
+Module with functions and data type for interacting with the ICP Ledger
 `/ledger_interface.mo`
-Module wid functions and data type for interacting with the ICP Ledger
 ```
 Interface = actor
 type ICP
@@ -232,8 +233,8 @@ type TransferResult
 type AccountBalanceArgs
 ```
 
-`/SHA224.mo`
 Module with functions and data types for interacting with the user's account
+`/SHA224.mo`
 ```
 K : [Nat32]
 S : [Nat32]
@@ -253,8 +254,8 @@ block(data : [Nat8])
 rot : (Nat32, Nat32) -> Nat32 = Nat32.bitrotRight
 ```
 
-`/types.mo`
 Module for interacting with the core login
+`/types.mo`
 ```
 type UserID
 type Username
@@ -263,8 +264,8 @@ type UserStatus
 type UserData
 ```
 
-`/main.mo`
 Core logic
+`/main.mo`
 
 We declare it's ID
 ```

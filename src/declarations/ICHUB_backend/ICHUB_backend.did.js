@@ -1,4 +1,5 @@
 export const idlFactory = ({ IDL }) => {
+  const AccountIdentifier = IDL.Vec(IDL.Nat8);
   const AvatarType = IDL.Variant({
     'url' : IDL.Null,
     'none' : IDL.Null,
@@ -28,6 +29,11 @@ export const idlFactory = ({ IDL }) => {
   });
   const ICHub = IDL.Service({
     'createUser' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], []),
+    'getBalanceFromAccount' : IDL.Func(
+        [AccountIdentifier],
+        [IDL.Record({ 'e8s' : IDL.Nat64 })],
+        [],
+      ),
     'getICPBalance' : IDL.Func([], [IDL.Record({ 'e8s' : IDL.Nat64 })], []),
     'getUserAvatar' : IDL.Func([], [IDL.Text, AvatarType], ['query']),
     'getUserData' : IDL.Func([], [IDL.Opt(UserData)], ['query']),

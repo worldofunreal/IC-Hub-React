@@ -1,0 +1,23 @@
+// Version: 1.0.0
+type MessageData =
+  {text : Text; time : Nat64; userID : UserID; username : Username};
+type MessageData__1 = MessageData;
+type MessageID = Nat;
+type MessageID__1 = MessageID;
+type RequestJoinData =
+  {dateRequested : Nat64; seenByAdmin : Bool; userID : UserID};
+type RequestJoinData__1 = RequestJoinData;
+type UserData =
+  {banned : Bool; userID : UserID; userSince : Nat64; username : Username};
+type UserData__1 = UserData;
+type UserID = Principal;
+type UserID__1 = UserID;
+type Username = Text;
+actor {
+  stable var _messages : [(MessageID__1, MessageData__1)];
+  stable var _pendingUsers : [(UserID__1, RequestJoinData__1)];
+  stable var _users : [(UserID__1, UserData__1)];
+  stable var coreCanister : Principal;
+  stable var message_counter : Nat;
+  stable var owner_ : Principal
+};

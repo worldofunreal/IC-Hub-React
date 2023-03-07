@@ -1,0 +1,61 @@
+type Username = text;
+type UserRoles = 
+ variant {
+   admin;
+   banned;
+   nouser;
+   owner;
+   user;
+ };
+type UserID__1 = principal;
+type UserID = principal;
+type UserData = 
+ record {
+   banned: bool;
+   userID: UserID__1;
+   userSince: nat64;
+   username: Username;
+ };
+type RequestJoinData = 
+ record {
+   dateRequested: nat64;
+   seenByAdmin: bool;
+   userID: UserID__1;
+ };
+type MessageID = nat;
+type MessageData = 
+ record {
+   "text": text;
+   time: nat64;
+   userID: UserID__1;
+   username: Username;
+ };
+type FullUserData = 
+ record {
+   avatar: text;
+   banned: bool;
+   role: nat;
+   userID: UserID__1;
+   userSince: nat64;
+   username: Username;
+ };
+service : {
+  add_text_message: (text) -> (bool);
+  approveUserPending: (UserID) -> (bool);
+  exit_chat: (UserID) -> (bool);
+  getCaller: () -> (principal) query;
+  getUserRole: () -> (UserRoles) query;
+  getUsersPending: () -> (vec RequestJoinData) query;
+  get_group_users: () -> (vec FullUserData) query;
+  get_messages: () -> (vec record {
+                             MessageID;
+                             MessageData;
+                           }) query;
+  get_total_messages: () -> (MessageID) query;
+  hasUserRequestedJoin: (UserID) -> (bool) query;
+  is_user_added: (UserID) -> (bool) query;
+  join_chat: (UserID, UserData) -> (bool);
+  rejectUserPending: (UserID) -> (bool);
+  transferOwner: (UserID) -> (bool, text);
+  user_request_join: (UserID) -> (bool, text);
+}

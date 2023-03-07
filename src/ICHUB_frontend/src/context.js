@@ -20,13 +20,15 @@ const AppProvider = ({ children }) => {
   const [canister, setCanister] = useState(null);
   const [walletPopup, setWalletPopup] = useState(null);
   const [walletService, setWalletService] = useState(null);
+  const [saveSession, setSaveSession] = useState(null);
   /// Values
   const value = { walletData, setWalletData, 
                   aID, setAID, 
                   identity, setIdentity,
                   canister, setCanister,
                   walletPopup, setWalletPopup,
-                  walletService, setWalletService
+                  walletService, setWalletService,
+                  saveSession, setSaveSession
                 };
   
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

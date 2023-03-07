@@ -1,6 +1,7 @@
 import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 
+export type AccountIdentifier = Uint8Array;
 export type AvatarType = { 'url' : null } |
   { 'none' : null } |
   { 'base64' : null };
@@ -9,6 +10,10 @@ export type AvatarType__1 = { 'url' : null } |
   { 'base64' : null };
 export interface ICHub {
   'createUser' : ActorMethod<[string, string], boolean>,
+  'getBalanceFromAccount' : ActorMethod<
+    [AccountIdentifier],
+    { 'e8s' : bigint },
+  >,
   'getICPBalance' : ActorMethod<[], { 'e8s' : bigint }>,
   'getUserAvatar' : ActorMethod<[], [string, AvatarType]>,
   'getUserData' : ActorMethod<[], [] | [UserData]>,

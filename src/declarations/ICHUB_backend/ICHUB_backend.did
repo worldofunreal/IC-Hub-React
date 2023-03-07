@@ -20,6 +20,7 @@ type UserData =
 type ICHub = 
  service {
    createUser: (text, text) -> (bool);
+   getBalanceFromAccount: (AccountIdentifier) -> (record {e8s: nat64;});
    getICPBalance: () -> (record {e8s: nat64;});
    getUserAvatar: () -> (text, AvatarType) query;
    getUserData: () -> (opt UserData) query;
@@ -37,4 +38,5 @@ type AvatarType =
    none;
    url;
  };
+type AccountIdentifier = blob;
 service : (principal) -> ICHub

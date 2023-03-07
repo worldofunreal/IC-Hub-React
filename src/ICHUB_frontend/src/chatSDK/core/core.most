@@ -1,0 +1,43 @@
+// Version: 1.0.0
+type Friends = {list : [UserID]; pending : [UserID]};
+type Friends__1 = Friends;
+type GroupData =
+  {
+    avatar : Text;
+    canister : Text;
+    description : Text;
+    groupID : GroupID;
+    isDirect : Bool;
+    isPrivate : Bool;
+    name : Text;
+    owner : Principal
+  };
+type GroupData__1 = GroupData;
+type GroupID = Nat;
+type GroupID__1 = GroupID;
+type UserData =
+  {
+    avatar : Text;
+    banned : Bool;
+    description : Text;
+    userID : UserID;
+    userSince : Nat64;
+    username : Username
+  };
+type UserData__2 = UserData;
+type UserGroups = {groups : [GroupID]};
+type UserGroups__1 = UserGroups;
+type UserID = Principal;
+type UserID__2 = UserID;
+type Username = Text;
+actor {
+  stable var _friendLists : [(UserID__2, Friends__1)];
+  stable var _groups : [(GroupID__1, GroupData__1)];
+  stable var _userGroups : [(UserID__2, UserGroups__1)];
+  stable var _userRequestedGroup : [(UserID__2, [GroupID__1])];
+  stable var _users : [(UserID__2, UserData__2)];
+  stable var _usersActivity : [(UserID__2, Text)];
+  stable var groupsCounter : Nat;
+  stable var inited : Bool;
+  stable var owner_ : Principal
+};

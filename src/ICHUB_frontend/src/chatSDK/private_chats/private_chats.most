@@ -1,0 +1,17 @@
+// Version: 1.0.0
+type MessageData =
+  {text : Text; time : Nat64; userID : UserID; username : Username};
+type MessageData__1 = MessageData;
+type MessageID = Nat;
+type MessageID__1 = MessageID;
+type UserID = Principal;
+type UserID__1 = UserID;
+type UserPrivateChats = {chatID : Nat32; userID : UserID};
+type UserPrivateChats__1 = UserPrivateChats;
+type Username = Text;
+actor {
+  stable var _messages : [(MessageID__1, [MessageData__1])];
+  stable var _usersChatsIDs : [(UserID__1, [UserPrivateChats__1])];
+  stable var message_counter : Nat;
+  stable var owner_ : Principal
+};

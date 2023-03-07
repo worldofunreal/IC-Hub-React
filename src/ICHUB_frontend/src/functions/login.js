@@ -13,7 +13,6 @@ const host = 'https://raw.ic0.app/';
 
 /// INTERNET IDENTITY
 export const loginII = async () => {
-  console.log("Loggin in II");
     const authClient = await AuthClient.create();
     return authClient;
 };
@@ -42,10 +41,8 @@ export const loginStoic = async () => {
 /// PLUG WALLET
 export const loginPlug = async () => {
     let connection = await window.ic.plug.requestConnect({ whitelist });
-    console.log("Plug connection:", connection);
     const principalId = await window.ic.plug.agent.getPrincipal();
     var principal = principalId;
-    console.log(principal);
     return principal;
 };
 

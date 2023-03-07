@@ -104,6 +104,13 @@ actor class ICHub(_owner : Principal){
     });
   };
 
+  public shared(msg) func getBalanceFromAccount(acc : Account.AccountIdentifier) : async {e8s:Nat64} {
+    let {e8s = payment} = await ledger.account_balance({
+      // account = Account.accountIdentifier(Principal.fromActor(Self), Account.defaultSubaccount())
+      account = acc
+    });
+  };
+
   func getUserSubaccount(u : Principal) : Account.AccountIdentifier{
     return Account.accountIdentifier(Principal.fromActor(actor(canisterID)), Account.principalToSubaccount(u));
   };

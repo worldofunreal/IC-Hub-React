@@ -1,0 +1,91 @@
+type Username__1 = text;
+type Username = text;
+type UserSearchData = 
+ record {
+   avatar: text;
+   commonFriends: nat;
+   commonGroups: nat;
+   status: text;
+   userID: UserID;
+   username: Username;
+ };
+type UserID__1 = principal;
+type UserID = principal;
+type UserGroups = record {groups: vec GroupID;};
+type UserFriendData = 
+ record {
+   avatar: text;
+   status: text;
+   userID: UserID;
+   username: Username;
+ };
+type UserData = 
+ record {
+   avatar: text;
+   banned: bool;
+   description: text;
+   userID: UserID;
+   userSince: nat64;
+   username: Username;
+ };
+type GroupID__1 = nat;
+type GroupID = nat;
+type GroupData = 
+ record {
+   avatar: text;
+   canister: text;
+   description: text;
+   groupID: GroupID;
+   isDirect: bool;
+   isPrivate: bool;
+   name: text;
+   owner: principal;
+ };
+type Friends = 
+ record {
+   list: vec UserID;
+   pending: vec UserID;
+ };
+service : {
+  add_user_to_group: (GroupID__1, UserID__1) -> (bool, text);
+  approveUserPendingGroup: (GroupID__1, UserID__1) -> (bool, text);
+  ban_user: (UserID__1) -> (bool);
+  changeGroupAvatar: (GroupID__1, text) -> (bool, text);
+  changeGroupDescription: (GroupID__1, text) -> (bool, text);
+  changeGroupName: (GroupID__1, text) -> (bool, text);
+  changeGroupPrivacy: (GroupID__1, bool) -> (bool, text);
+  changeUserDescription: (text) -> (bool);
+  create_group: (text, bool, bool, text) -> (bool, text);
+  create_private_chat: (UserID__1) -> (bool, text, nat);
+  create_user_profile: (Username__1, text) -> (bool, text);
+  friendRequest: (UserID__1) -> (bool, text);
+  getAllGroups: () -> (vec record {
+                             GroupID__1;
+                             GroupData;
+                           }) query;
+  getAllUsers: () -> (vec record {
+                            UserID__1;
+                            UserData;
+                          }) query;
+  getFriendListData: () -> (opt Friends) query;
+  getIsFriend: (UserID__1) -> (nat) query;
+  getMyFriendRequests: () -> (vec UserFriendData) query;
+  getMyFriends: () -> (vec UserFriendData) query;
+  getPrivateChat: (UserID__1) -> (nat, bool) query;
+  getUserAvatar: (UserID__1) -> (text);
+  getUserGroupsAdmin: (UserID__1) -> (opt UserGroups) query;
+  getUserID: () -> (principal);
+  getUsername: (UserID__1) -> (Username__1) query;
+  getUsersActivity: (UserID__1) -> (opt text) query;
+  get_user: (UserID__1) -> (opt UserData) query;
+  get_user_groups: () -> (vec GroupData) query;
+  hasUserRequestedJoin: (GroupID__1) -> (bool) query;
+  initialize: () -> (bool);
+  is_used_added: (GroupID__1, UserID__1) -> (bool) query;
+  logUserActivity: (text) -> (bool, text);
+  rejectFriendRequest: (UserID__1) -> (bool, text);
+  rejectUserPendingGroup: (GroupID__1, UserID__1) -> (bool, text);
+  remove_user_from_group: (UserID__1, GroupID__1) -> (bool, text);
+  search_group_by_name: (text) -> (opt vec GroupData) query;
+  search_user_by_name: (text) -> (opt vec UserSearchData) query;
+}

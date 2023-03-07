@@ -1,14 +1,15 @@
 # ICHUB
 
-Welcome to ICHUB, a project where users will be able to add their own projects, publish their news, connect with your friends, chat in public and private groups and much more!
+Welcome to ICHUB, a project where users will be able to add their own projects, publish their news, connect with their friends, chat in public and private groups and much more!
 
 This repository contains the Frontend in React and Backend in Motoko
-Both are hosted in the Internet Computer and the frontend can be found in:
+Both are hosted in the Internet Computer.
+The frontend can be found in:
 [https://md7ke-jyaaa-aaaak-qbrya-cai.raw.ic0.app/](https://md7ke-jyaaa-aaaak-qbrya-cai.raw.ic0.app/)
 
 # Code documentation
 
-The code splits in the Core Project and the ChatSDK, each one have a Context file to use their functions and variables in any file.
+The backend code splits in the Core Project and the ChatSDK, each one have a Context file to use their functions and variables in any file.
 
 # ChatSDK
 You can find the code and documentation here

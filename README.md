@@ -10,6 +10,12 @@ Both are hosted in the Internet Computer and the frontend can be found in:
 
 The code splits in the Core Project and the ChatSDK, each one have a Context file to use their functions and variables in any file.
 
+# ChatSDK
+You can find the code and documentation here
+[https://github.com/WorldOfUnreal/chatsdk](https://github.com/WorldOfUnreal/chatsdk)
+
+# Core Project
+
 The user needs to follow a flow:
 - Login selecting a wallet
 

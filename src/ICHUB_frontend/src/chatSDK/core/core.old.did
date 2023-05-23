@@ -88,4 +88,5 @@ service : {
   remove_user_from_group: (UserID__1, GroupID__1) -> (bool, text);
   search_group_by_name: (text) -> (opt vec GroupData) query;
   search_user_by_name: (text) -> (opt vec UserSearchData) query;
+  setImageToUser: (text) -> (bool);
 }

@@ -2,23 +2,24 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 
 export interface ChatCore {
+  'addUserFavApp' : ActorMethod<[UserID__1], boolean>,
   'add_user_to_group' : ActorMethod<[GroupID__1, UserID__1], [boolean, string]>,
   'approveUserPendingGroup' : ActorMethod<
     [GroupID__1, UserID__1],
-    [boolean, string],
+    [boolean, string]
   >,
   'ban_user' : ActorMethod<[UserID__1], boolean>,
   'changeGroupAvatar' : ActorMethod<[GroupID__1, string], [boolean, string]>,
   'changeGroupDescription' : ActorMethod<
     [GroupID__1, string],
-    [boolean, string],
+    [boolean, string]
   >,
   'changeGroupName' : ActorMethod<[GroupID__1, string], [boolean, string]>,
   'changeGroupPrivacy' : ActorMethod<[GroupID__1, boolean], [boolean, string]>,
   'changeUserDescription' : ActorMethod<[string], boolean>,
   'create_group' : ActorMethod<
     [string, boolean, boolean, string],
-    [boolean, string],
+    [boolean, string]
   >,
   'create_private_chat' : ActorMethod<[UserID__1], [boolean, string, bigint]>,
   'create_user_profile' : ActorMethod<[Username__1, string], [boolean, string]>,
@@ -27,6 +28,7 @@ export interface ChatCore {
   'getAllUsers' : ActorMethod<[], Array<[UserID__1, UserData]>>,
   'getFriendListData' : ActorMethod<[], [] | [Friends]>,
   'getIsFriend' : ActorMethod<[UserID__1], bigint>,
+  'getMyFavorites' : ActorMethod<[], Array<UserFavorite>>,
   'getMyFriendRequests' : ActorMethod<[], Array<UserFriendData>>,
   'getMyFriends' : ActorMethod<[], Array<UserFriendData>>,
   'getPrivateChat' : ActorMethod<[UserID__1], [bigint, boolean]>,
@@ -34,21 +36,21 @@ export interface ChatCore {
   'getUserGroupsAdmin' : ActorMethod<[UserID__1], [] | [UserGroups]>,
   'getUserID' : ActorMethod<[], Principal>,
   'getUsername' : ActorMethod<[UserID__1], Username__1>,
-  'getUsersActivity' : ActorMethod<[UserID__1], [] | [string]>,
+  'getUsersActivity' : ActorMethod<[UserID__1], string>,
   'get_user' : ActorMethod<[UserID__1], [] | [UserData]>,
   'get_user_groups' : ActorMethod<[], Array<GroupData>>,
   'hasUserRequestedJoin' : ActorMethod<[GroupID__1], boolean>,
   'initialize' : ActorMethod<[], boolean>,
   'is_used_added' : ActorMethod<[GroupID__1, UserID__1], boolean>,
-  'logUserActivity' : ActorMethod<[string], [boolean, string]>,
+  'logUserActivity' : ActorMethod<[string, boolean], [boolean, string]>,
   'rejectFriendRequest' : ActorMethod<[UserID__1], [boolean, string]>,
   'rejectUserPendingGroup' : ActorMethod<
     [GroupID__1, UserID__1],
-    [boolean, string],
+    [boolean, string]
   >,
   'remove_user_from_group' : ActorMethod<
     [UserID__1, GroupID__1],
-    [boolean, string],
+    [boolean, string]
   >,
   'search_group_by_name' : ActorMethod<[string], [] | [Array<GroupData>]>,
   'search_user_by_name' : ActorMethod<[string], [] | [Array<UserSearchData>]>,
@@ -75,6 +77,7 @@ export interface UserData {
   'description' : string,
   'avatar' : string,
 }
+export interface UserFavorite { 'order' : bigint, 'project' : UserID }
 export interface UserFriendData {
   'status' : string,
   'username' : Username,

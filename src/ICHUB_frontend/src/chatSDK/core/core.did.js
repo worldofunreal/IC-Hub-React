@@ -1,6 +1,6 @@
 export const idlFactory = ({ IDL }) => {
-  const GroupID__1 = IDL.Nat;
   const UserID__1 = IDL.Principal;
+  const GroupID__1 = IDL.Nat;
   const Username__1 = IDL.Text;
   const GroupID = IDL.Nat;
   const GroupData = IDL.Record({
@@ -27,6 +27,7 @@ export const idlFactory = ({ IDL }) => {
     'pending' : IDL.Vec(UserID),
     'list' : IDL.Vec(UserID),
   });
+  const UserFavorite = IDL.Record({ 'order' : IDL.Nat, 'project' : UserID });
   const UserFriendData = IDL.Record({
     'status' : IDL.Text,
     'username' : Username,
@@ -43,6 +44,7 @@ export const idlFactory = ({ IDL }) => {
     'avatar' : IDL.Text,
   });
   const ChatCore = IDL.Service({
+    'addUserFavApp' : IDL.Func([UserID__1], [IDL.Bool], []),
     'add_user_to_group' : IDL.Func(
         [GroupID__1, UserID__1],
         [IDL.Bool, IDL.Text],
@@ -103,6 +105,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getFriendListData' : IDL.Func([], [IDL.Opt(Friends)], ['query']),
     'getIsFriend' : IDL.Func([UserID__1], [IDL.Nat], ['query']),
+    'getMyFavorites' : IDL.Func([], [IDL.Vec(UserFavorite)], ['query']),
     'getMyFriendRequests' : IDL.Func([], [IDL.Vec(UserFriendData)], ['query']),
     'getMyFriends' : IDL.Func([], [IDL.Vec(UserFriendData)], ['query']),
     'getPrivateChat' : IDL.Func([UserID__1], [IDL.Nat, IDL.Bool], ['query']),
@@ -114,13 +117,17 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getUserID' : IDL.Func([], [IDL.Principal], []),
     'getUsername' : IDL.Func([UserID__1], [Username__1], ['query']),
-    'getUsersActivity' : IDL.Func([UserID__1], [IDL.Opt(IDL.Text)], ['query']),
+    'getUsersActivity' : IDL.Func([UserID__1], [IDL.Text], ['query']),
     'get_user' : IDL.Func([UserID__1], [IDL.Opt(UserData)], ['query']),
     'get_user_groups' : IDL.Func([], [IDL.Vec(GroupData)], ['query']),
     'hasUserRequestedJoin' : IDL.Func([GroupID__1], [IDL.Bool], ['query']),
     'initialize' : IDL.Func([], [IDL.Bool], []),
     'is_used_added' : IDL.Func([GroupID__1, UserID__1], [IDL.Bool], ['query']),
-    'logUserActivity' : IDL.Func([IDL.Text], [IDL.Bool, IDL.Text], []),
+    'logUserActivity' : IDL.Func(
+        [IDL.Text, IDL.Bool],
+        [IDL.Bool, IDL.Text],
+        [],
+      ),
     'rejectFriendRequest' : IDL.Func([UserID__1], [IDL.Bool, IDL.Text], []),
     'rejectUserPendingGroup' : IDL.Func(
         [GroupID__1, UserID__1],

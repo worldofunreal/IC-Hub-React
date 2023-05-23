@@ -1,0 +1,6 @@
+// Version: 1.0.0
+type ImageData = {iType : Text; image : Blob; user : Principal};
+type ImageData__1 = ImageData;
+actor {
+  stable var _images : [(Text, ImageData__1)]
+};

@@ -19,6 +19,11 @@ type UserFriendData =
    userID: UserID;
    username: Username;
  };
+type UserFavorite = 
+ record {
+   order: nat;
+   project: UserID;
+ };
 type UserData = 
  record {
    avatar: text;
@@ -48,6 +53,7 @@ type Friends =
  };
 type ChatCore = 
  service {
+   addUserFavApp: (UserID__1) -> (bool);
    add_user_to_group: (GroupID__1, UserID__1) -> (bool, text);
    approveUserPendingGroup: (GroupID__1, UserID__1) -> (bool, text);
    ban_user: (UserID__1) -> (bool);
@@ -70,6 +76,7 @@ type ChatCore =
                            }) query;
    getFriendListData: () -> (opt Friends) query;
    getIsFriend: (UserID__1) -> (nat) query;
+   getMyFavorites: () -> (vec UserFavorite) query;
    getMyFriendRequests: () -> (vec UserFriendData) query;
    getMyFriends: () -> (vec UserFriendData) query;
    getPrivateChat: (UserID__1) -> (nat, bool) query;
@@ -77,13 +84,13 @@ type ChatCore =
    getUserGroupsAdmin: (UserID__1) -> (opt UserGroups) query;
    getUserID: () -> (principal);
    getUsername: (UserID__1) -> (Username__1) query;
-   getUsersActivity: (UserID__1) -> (opt text) query;
+   getUsersActivity: (UserID__1) -> (text) query;
    get_user: (UserID__1) -> (opt UserData) query;
    get_user_groups: () -> (vec GroupData) query;
    hasUserRequestedJoin: (GroupID__1) -> (bool) query;
    initialize: () -> (bool);
    is_used_added: (GroupID__1, UserID__1) -> (bool) query;
-   logUserActivity: (text) -> (bool, text);
+   logUserActivity: (text, bool) -> (bool, text);
    rejectFriendRequest: (UserID__1) -> (bool, text);
    rejectUserPendingGroup: (GroupID__1, UserID__1) -> (bool, text);
    remove_user_from_group: (UserID__1, GroupID__1) -> (bool, text);

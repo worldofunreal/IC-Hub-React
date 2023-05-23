@@ -1,0 +1,15 @@
+type NFTMetadata = 
+ record {
+   addedBy: principal;
+   canisterID: principal;
+   marketplace: opt text;
+   name: text;
+   standard: text;
+ };
+service : {
+  addNFTCollection: (NFTMetadata) -> (bool, text);
+  getNfts: () -> (vec record {
+                        principal;
+                        NFTMetadata;
+                      }) query;
+}

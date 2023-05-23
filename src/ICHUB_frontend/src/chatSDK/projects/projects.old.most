@@ -1,0 +1,41 @@
+// Version: 1.0.0
+type NFTsCollections = {collections : [Text]};
+type ProjectData =
+  {
+    appCategoryIndex : Nat;
+    banner : Text;
+    blockchain : Text;
+    catalyze : Text;
+    currentVersion : Text;
+    distrikt : Text;
+    dscvrPortal : Text;
+    id : Nat;
+    launchLink : Text;
+    logo : Text;
+    name : Text;
+    newVersion : Text;
+    nftCollections : NFTsCollections;
+    openChat : Text;
+    patchNotes : Text;
+    twitter : Text
+  };
+type ProjectData__1 = ProjectData;
+type ProjectNews =
+  {
+    content : Text;
+    imageNews : Text;
+    linkButton : Text;
+    newsId : Nat;
+    textButton : Text;
+    title : Text
+  };
+type ProjectNews__1 = ProjectNews;
+type UserID = Principal;
+type UserID__1 = UserID;
+actor {
+  stable var _projects : [(UserID__1, ProjectData__1)];
+  stable var _projectsCollections : [(UserID__1, [Text])];
+  stable var _projectsNews : [(UserID__1, [ProjectNews__1])];
+  stable var newsCount : Nat;
+  stable var projectsCount : Nat
+};

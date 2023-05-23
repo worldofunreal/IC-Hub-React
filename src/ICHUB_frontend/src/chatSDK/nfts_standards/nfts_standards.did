@@ -1,0 +1,17 @@
+type Projects = 
+ service {
+   addNFTCollection: (NFTMetadata) -> (bool, text);
+   getNftsCanisters: () -> (vec record {
+                                  principal;
+                                  NFTMetadata;
+                                }) query;
+ };
+type NFTMetadata = 
+ record {
+   addedBy: principal;
+   canisterID: principal;
+   marketplace: opt text;
+   name: text;
+   standard: text;
+ };
+service : (principal) -> Projects

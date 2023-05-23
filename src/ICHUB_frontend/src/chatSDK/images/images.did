@@ -1,0 +1,32 @@
+type ImageData = 
+ record {
+   iType: text;
+   image: blob;
+   user: principal;
+ };
+type HttpResponse = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   status_code: nat16;
+ };
+type HttpRequest = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   method: text;
+   url: text;
+ };
+type HeaderField = 
+ record {
+   text;
+   text;
+ };
+service : {
+  getAllImages: () -> (vec record {
+                             text;
+                             ImageData;
+                           }) query;
+  http_request: (HttpRequest) -> (HttpResponse) query;
+  saveImage: (blob, text) -> (bool, text);
+}

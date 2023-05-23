@@ -1,0 +1,21 @@
+{ "data": [
+   {
+        "id": 0,
+        "name": "DSCVR",
+        "appCategoryIndex": 3,
+        "logo": "https://gateway.pinata.cloud/ipfs/QmaiCADwrUBsCu56NrvoAf7kTa9Fi9K7LHTiHV3NrF4g2Q",
+        "banner": "https://gateway.pinata.cloud/ipfs/Qmf4hY19kUZupgizTWJ4qfMg29rTozrE4vvutMEXLWEukg",
+        "patchNotes": "",
+        "dscvrPortal": "https://dscvr.one/p/dscvr",
+        "marketPlaces": "https://entrepot.app/marketplace/portal-hunt",
+        "blockchain": "Internet Computer",
+        "distrikt": "https://distrikt.app/u/dscvr",
+        "openChat": "https://oc.app/#/l3gqx-hiaaa-aaaaf-aadxa-cai",
+        "catalyze": "https://aqs24-xaaaa-aaaal-qbbea-cai.ic0.app/groups/40",
+        "twitter" :"https://twitter.com/DSCVR1",
+        "nftCollections": "",
+        "newVersion": "",
+        "currentVersion": "Public",
+        "launchLink": "https://dscvr.one/"
+    }
+ ]}

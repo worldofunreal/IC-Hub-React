@@ -15,6 +15,9 @@ type GroupData =
 type GroupData__1 = GroupData;
 type GroupID = Nat;
 type GroupID__1 = GroupID;
+type UserActivity =
+  {auto : Text; define : Text; lastActivity : Nat64; offline : Bool};
+type UserActivity__1 = UserActivity;
 type UserData =
   {
     avatar : Text;
@@ -25,6 +28,8 @@ type UserData =
     username : Username
   };
 type UserData__2 = UserData;
+type UserFavorite = {order : Nat; project : UserID};
+type UserFavorite__1 = UserFavorite;
 type UserGroups = {groups : [GroupID]};
 type UserGroups__1 = UserGroups;
 type UserID = Principal;
@@ -36,7 +41,8 @@ actor {
   stable var _userGroups : [(UserID__2, UserGroups__1)];
   stable var _userRequestedGroup : [(UserID__2, [GroupID__1])];
   stable var _users : [(UserID__2, UserData__2)];
-  stable var _usersActivity : [(UserID__2, Text)];
+  stable var _usersActivity : [(UserID__2, UserActivity__1)];
+  stable var _usersFavorites : [(UserID__2, [UserFavorite__1])];
   stable var groupsCounter : Nat;
   stable var inited : Bool;
   stable var owner_ : Principal

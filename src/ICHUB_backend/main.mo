@@ -1,9 +1,12 @@
 import Blob      "mo:base/Blob";
 import Hash      "mo:base/Hash";
 import HashMap   "mo:base/HashMap";
+import Int       "mo:base/Int";
 import Iter      "mo:base/Iter";
+import Nat64     "mo:base/Nat64";
 import Principal "mo:base/Principal";
 import Text      "mo:base/Text";
+import Time      "mo:base/Time";
 
 import Account "./Account";
 import Types   "./types";
@@ -14,6 +17,8 @@ actor class ICHub(_owner : Principal){
 
   private let canisterID : Text = "oqnbw-faaaa-aaaag-abcvq-cai";
   private let ledger     : Ledger.Interface = actor("ryjl3-tyaaa-aaaaa-aaaba-cai");
+
+  private stable var transfer_fee : Nat64 = 10_000;
 
   type AvatarType     = Types.AvatarType;
   type UserID         = Types.UserID;
@@ -109,6 +114,26 @@ actor class ICHub(_owner : Principal){
       // account = Account.accountIdentifier(Principal.fromActor(Self), Account.defaultSubaccount())
       account = acc
     });
+  };
+
+  public shared(msg) func sendICP(icp: Nat64, to : Account.AccountIdentifier) : async (Bool, Text, ?Ledger.TransferResult){
+    let _userAccount    = getUserSubaccount(msg.caller);
+    let _userICPBalance : {e8s : Nat64} = await ledger.account_balance({
+      account = _userAccount
+    });
+    if(_userICPBalance.e8s >= icp){
+      let res_icp = await ledger.transfer({
+              memo : Nat64    = 0;
+              //from_subaccount = ?_userAccount;
+              from_subaccount = ?Account.principalToSubaccount(msg.caller);
+              to              = to;
+              amount          = { e8s = icp - transfer_fee };
+              fee             = { e8s = transfer_fee };
+              created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+      });
+      return (true, "Sent", ?res_icp);
+    };
+    return (false, "Insufficient balance", null);
   };
 
   func getUserSubaccount(u : Principal) : Account.AccountIdentifier{

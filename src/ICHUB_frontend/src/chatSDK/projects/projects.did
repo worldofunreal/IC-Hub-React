@@ -1,0 +1,48 @@
+type UserID = principal;
+type Projects = 
+ service {
+   addNewsToProject: (ProjectNews) -> (bool, text);
+   createProject: (ProjectData) -> (bool, text);
+   getAllProjects: () -> (vec ProjectFullData) query;
+   getMyProject: () -> (opt ProjectData) query;
+   getMyProjectNews: () -> (opt vec ProjectNews) query;
+   getProjectById: (nat) -> (bool, opt ProjectData) query;
+   getProjectNewsById: (nat) -> (opt vec ProjectNews) query;
+   updateProject: (nat, ProjectData) -> (bool, text);
+ };
+type ProjectNews = 
+ record {
+   content: text;
+   imageNews: text;
+   linkButton: text;
+   newsId: nat;
+   textButton: text;
+   title: text;
+ };
+type ProjectFullData = 
+ record {
+   data: ProjectData;
+   news: opt vec ProjectNews;
+   user: UserID;
+ };
+type ProjectData = 
+ record {
+   appCategoryIndex: nat;
+   banner: text;
+   blockchain: text;
+   catalyze: text;
+   currentVersion: text;
+   distrikt: text;
+   dscvrPortal: text;
+   id: nat;
+   launchLink: text;
+   logo: text;
+   name: text;
+   newVersion: text;
+   nftCollections: NFTsCollections;
+   openChat: text;
+   patchNotes: text;
+   twitter: text;
+ };
+type NFTsCollections = record {collections: vec text;};
+service : (principal) -> Projects

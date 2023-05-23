@@ -16,5 +16,6 @@ type UserID__1 = UserID;
 type UserStatus = {#active; #banned; #inactive; #incomplete};
 type Username = Text;
 actor {
-  stable var _users : [(UserID__1, UserData__1)]
+  stable var _users : [(UserID__1, UserData__1)];
+  stable var transfer_fee : Nat64
 };

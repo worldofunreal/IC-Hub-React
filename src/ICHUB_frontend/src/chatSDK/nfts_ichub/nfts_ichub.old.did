@@ -1,0 +1,171 @@
+type User__1 = 
+ variant {
+   address: AccountIdentifier;
+   "principal": principal;
+ };
+type User = 
+ variant {
+   address: AccountIdentifier;
+   "principal": principal;
+ };
+type TransferResponse = 
+ variant {
+   err:
+    variant {
+      CannotNotify: AccountIdentifier;
+      InsufficientBalance;
+      InvalidToken: TokenIdentifier;
+      Other: text;
+      Rejected;
+      Unauthorized: AccountIdentifier;
+    };
+   ok: Balance;
+ };
+type TransferRequest = 
+ record {
+   amount: Balance;
+   from: User;
+   memo: opt Memo;
+   notify: bool;
+   subaccount: opt SubAccount;
+   to: User;
+   token: TokenIdentifier;
+ };
+type TokenIndex = nat32;
+type TokenIdentifier__1 = text;
+type TokenIdentifier = text;
+type SubAccount = vec nat8;
+type Result_3 = 
+ variant {
+   err: CommonError;
+   ok: AccountIdentifier__1;
+ };
+type Result_2 = 
+ variant {
+   err: CommonError;
+   ok: TokenIndex;
+ };
+type Result_1 = 
+ variant {
+   err: CommonError;
+   ok: Metadata;
+ };
+type Result = 
+ variant {
+   err: CommonError;
+   ok: Balance__1;
+ };
+type MintRequest = 
+ record {
+   metadata: opt blob;
+   to: User;
+ };
+type Metadata = 
+ variant {
+   fungible:
+    record {
+      decimals: nat8;
+      metadata: opt blob;
+      name: text;
+      symbol: text;
+    };
+   nonfungible: record {metadata: opt blob;};
+ };
+type Memo = blob;
+type HttpResponse = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   status_code: nat16;
+ };
+type HttpRequest = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   method: text;
+   url: text;
+ };
+type HeaderField = 
+ record {
+   text;
+   text;
+ };
+type Extension = text;
+type CommonError__1 = 
+ variant {
+   InvalidToken: TokenIdentifier;
+   Other: text;
+ };
+type CommonError = 
+ variant {
+   InvalidToken: TokenIdentifier;
+   Other: text;
+ };
+type Balance__1 = nat;
+type BalanceResponse = 
+ variant {
+   err: CommonError__1;
+   ok: Balance;
+ };
+type BalanceRequest = 
+ record {
+   token: TokenIdentifier;
+   user: User;
+ };
+type Balance = nat;
+type ApproveRequest = 
+ record {
+   allowance: Balance;
+   spender: principal;
+   subaccount: opt SubAccount;
+   token: TokenIdentifier;
+ };
+type AllowanceRequest = 
+ record {
+   owner: User;
+   spender: principal;
+   token: TokenIdentifier;
+ };
+type AccountIdentifier__1 = text;
+type AccountIdentifier = text;
+service : {
+  acceptCycles: () -> ();
+  allowance: (AllowanceRequest) -> (Result) query;
+  approve: (ApproveRequest) -> ();
+  availableCycles: () -> (nat) query;
+  balance: (BalanceRequest) -> (BalanceResponse) query;
+  bearer: (TokenIdentifier__1) -> (Result_3) query;
+  distribute: (User__1) -> ();
+  extensions: () -> (vec Extension) query;
+  freeGift: (AccountIdentifier__1) -> (opt TokenIndex);
+  getAllowances: () -> (vec record {
+                              TokenIndex;
+                              principal;
+                            }) query;
+  getBuyers: () -> (vec record {
+                          AccountIdentifier__1;
+                          vec TokenIndex;
+                        }) query;
+  getMinted: () -> (TokenIndex) query;
+  getMinter: () -> (principal) query;
+  getRegistry: () -> (vec record {
+                            TokenIndex;
+                            AccountIdentifier__1;
+                          }) query;
+  getSold: () -> (TokenIndex) query;
+  getTokens: () -> (vec record {
+                          TokenIndex;
+                          Metadata;
+                        }) query;
+  getUserBalance: (principal) -> (vec record {
+                                        TokenIndex;
+                                        Metadata;
+                                      }) query;
+  http_request: (HttpRequest) -> (HttpResponse) query;
+  index: (TokenIdentifier__1) -> (Result_2) query;
+  metadata: (TokenIdentifier__1) -> (Result_1) query;
+  mintNFT: (MintRequest) -> (TokenIndex);
+  setMinter: (principal) -> ();
+  supply: (TokenIdentifier__1) -> (Result) query;
+  transfer: (TransferRequest) -> (TransferResponse);
+}

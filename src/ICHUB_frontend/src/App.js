@@ -6,9 +6,11 @@ import { fromHexString, toHexString } from "./functions/account";
 import { AppContext } from './context';
 import { ChatAppContext } from './chatSDK/chatAppContext';
 import { Usergeek } from "usergeek-ic-js";
-import allProjects from "./resources/projects.json";
+import axios from 'axios';
+import "./styles/main.css";
 
 /// Add Unity build files to the project
+const chunkSize = 2000000;
 const unityContext = new UnityContext({
     codeUrl:      "ICHUB/Build/ICHUB.wasm",
     dataUrl:      "ICHUB/Build/ICHUB.data",
@@ -20,25 +22,40 @@ const version = 0.51;
 
 let ccID = "acedcf79daec4cb86dd7b44c53dd5111a81a006d26a63b8dd5e822b6fd711ad5";
 
-/// For the moment this data is added manually until all the core structure is better planned and then coded into backend
-const manual_projects = JSON.stringify(allProjects);
-
 export default function App(props){
+
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]);
+      };
+    
+      const handleSubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData();
+        formData.append('image', file);
+        try {
+          await axios.post('/api/upload', formData);
+          alert('Image uploaded successfully');
+        } catch (error) {
+          alert('Error uploading image');
+        }
+      };
 
     /// Functions from the App context
     let { identity, setIdentity, canister, setCanister, walletPopup, setWalletPopup, walletService, setWalletService,
           saveSession, setSaveSession } = useContext(AppContext);
     /// Functions from the Chat context
     let { setUnityApp, setWalletSelected, setCoreCanisterExternal, setUserPrincipal, setIdentityChat, setUsername, 
-            searchGroup, createGroup, addUserToGroup, userPrincipal, selectChat, leaveGroup, requestJoinGroup, 
-            getGroupUsers, acceptGroupRequest, rejectGroupRequest, changeGroupTitle, changeGroupDescription, 
-            changeGroupPrivacy, getUserDataFromID, getUserFriends, getUserPendingNotifications, setUserdataHub,
-            acceptFriendRequest, rejectFriendRequest, messageUser, requestFriendship, logUserActivity, getUsersActivity,
-            searchUsers, changeUserDescription, setImageToUser, checkUserActivity } = useContext(ChatAppContext);
+            searchGroup, createGroup, selectChat, leaveGroup, requestJoinGroup, acceptGroupRequest, rejectGroupRequest, 
+            changeGroupTitle, changeGroupDescription, changeGroupPrivacy, getUserDataFromID, getUserFriends, 
+            getUserPendingNotifications, setUserdataHub, acceptFriendRequest, rejectFriendRequest, messageUser, 
+            requestFriendship, logUserActivity, searchUsers, changeUserDescription, setImageToUser, checkUserActivity,
+            getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, setCurrentSection, nftList, addNFTCollection
+        } = useContext(ChatAppContext);
     /// Local variables
     const [usergeekInitialized, setUsergeekInitialized] = useState(false);
     const [balance, setBalance] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [imageLoadingSection, setImageLoadingSection] = useState(null);
 
     ///////// INITIALIZE /////////
     useEffect(() => {
@@ -50,7 +67,7 @@ export default function App(props){
         unityContext.on("loaded", function () {
           setIsLoaded(true);
         });
-      }, []);
+    }, []);
 
     ///////// USERGEEK /////////
     const initializeUsergeek = () => {
@@ -205,7 +222,6 @@ export default function App(props){
         };
 
         unityContext.on("OnHubScene", () => {
-            sendProjectsManual();
             getICPBalance();
             getICPFromAccount();
             getUserFriends();
@@ -317,20 +333,16 @@ export default function App(props){
             }
         };
 
-        unityContext.on("SetAvatar", () => {
-            saveUserImage();
+        unityContext.on("SetAvatarURL", (_url) => {
+            saveUserImage(_url);
         });
 
-        const saveUserImage = async () => {
-            let img = "https://cdn3.iconfinder.com/data/icons/delivery-and-logistics/24/logistics-25-512.png";
+        const saveUserImage = async (img) => {
+            //let img = "https://cdn3.iconfinder.com/data/icons/delivery-and-logistics/24/logistics-25-512.png";
             let _uImg = await canister.setImageToUser(img, { "url": null });
             await setImageToUser(img);
             console.log("_uImg", _uImg);
             unityContext.send("Canvas","OnAvatarReady", "");
-        };
-
-        const sendProjectsManual = () => {
-            unityContext.send("Hub_Panel","GetAppsInfo", manual_projects);
         };
 
     ///////// SEARCH GROUPS /////////
@@ -340,7 +352,6 @@ export default function App(props){
 
         const isUserInGroup = async (name) => {
             let _isUserInGroup = await searchGroup(name);
-            console.log("USER IN GROUP", JSON.stringify(_isUserInGroup));
             unityContext.send("SearchGroup Panel", "GetGroups", JSON.stringify(_isUserInGroup));
         };
 
@@ -354,7 +365,6 @@ export default function App(props){
         joinGroup(groupID);
     });
     const joinGroup = async (groupID) => {
-        console.log("JOIN GROUP", groupID);
         let _requested = await requestJoinGroup(groupID);
         if(_requested[0] === true){
             unityContext.send("CanvasPopup", "OpenSuccessPanel", "");
@@ -424,16 +434,22 @@ export default function App(props){
         changeUserDescription(newDescription);
     });
 
+    /// PANELS
+    unityContext.on("CurrentSection", (id) => {
+        setCurrentSection(id);
+    });
+
     /// For User Panel Info
     unityContext.on("CallToUser", (userRequestedID) => {
         getUserDataFromID(userRequestedID);
     });
 
     /// User's activity
-    /*unityContext.on("logUserActivity", (_data) => {
+    unityContext.on("ChangeStatus", (_data) => {
         logUserActivity(_data);
     });
 
+    /*
     unityContext.on("getUsersActivity", () => {
         getUsersActivity();
     });
@@ -453,6 +469,63 @@ export default function App(props){
     //// Pk#1234 (Plug)  4fec8917ffd42657c22e82a59eb9ae9f48b8503125811059fc5bffd4c72c6d1f
     //// Pk#4321 (Stoic) fbaab62eb1b779036e885fa186b1abcba2e63571cd50de5ebdf209c79cd0113f
 
+    const readFile = async (files) => {
+        let file = files[0];
+        if(file.size > chunkSize){
+            alert("File too big. Max size is 2 MB");
+            return false;
+        }
+        let _u = await canisterImages.saveImage([...new Uint8Array(await file.arrayBuffer())], file.type);
+        let urlImage = "https://" + canisterImagesId + ".raw.ic0.app/img=" + _u[1];
+
+        console.log("Image", urlImage);
+        switch(imageLoadingSection){
+            case null:
+                break;
+            case "logo":
+                unityContext.send("AppManagement_Section", "GetImageLogo", urlImage);
+                break;
+            case "banner":
+                unityContext.send("AppManagement_Section", "GetImageBanner", urlImage);
+                break;
+            case "imageNews":
+                unityContext.send("AppManagement_Section", "GetImageNews", urlImage);
+                break;
+            case "SetAvatarImage":
+                unityContext.send("Canvas", "OnAvatarUploadReady", urlImage);
+                break;
+        }
+        setImageLoadingSection(null);
+    };
+
+    unityContext.on("SetAvatarImage", () => {
+        setImageLoadingSection("SetAvatarImage");
+        openUploadImageProfile();
+    });
+
+    const openUploadImageProfile = () => {
+        var event = new MouseEvent('click', {
+            'view': window, 
+            'bubbles': true, 
+            'cancelable': false
+        });
+        var node = document.getElementById('new-file');
+        node.dispatchEvent(event);
+    };
+
+    unityContext.on("SendDataApp", (json) => {
+        saveDataApp(JSON.parse(json));
+    });
+
+    unityContext.on("SendDataNews", (json) => {
+        saveNews(JSON.parse(json));
+    });
+
+    /// IMAGES
+    unityContext.on("SetImage", (_option) => {
+        setImageLoadingSection(_option);
+        openUploadImageProfile();
+    });
 
     return(
         <>
@@ -464,7 +537,16 @@ export default function App(props){
                 }} 
             />
             <br />
-            {/*<label>{balance}</label>*/}
+            <label>{/*balance*/}</label>
+            <br />
+            <div className='hide'>
+                <input type="file" id="new-file" accept="image/*" onChange={(e)=>{ readFile(e.target.files); }} />
+            </div>
+            {/*<div>
+                <button onClick={() => { addNFTCollection("EXT", "ce2k4-aiaaa-aaaam-qa4ka-cai", "PAW Collection", "https://entrepot.app/marketplace/paw-collection"); }}>ADD PAW COLLECTION COLLECTION</button>
+            </div>*/}
+            <div><button onClick={() => { getTokens() }}>GET TOKENS</button></div>
+            <div>{nftList}</div>
         </>
     );
 };

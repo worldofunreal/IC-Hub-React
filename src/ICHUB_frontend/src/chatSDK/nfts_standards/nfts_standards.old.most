@@ -1,0 +1,13 @@
+// Version: 1.0.0
+type NFTMetadata =
+  {
+    addedBy : Principal;
+    canisterID : Principal;
+    marketplace : ?Text;
+    name : Text;
+    standard : Text
+  };
+type NFTMetadata__1 = NFTMetadata;
+actor {
+  stable var _nfts : [(Principal, NFTMetadata__1)]
+};

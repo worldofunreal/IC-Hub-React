@@ -14,8 +14,9 @@ const images                  = "avnm2-3aaaa-aaaaj-qacba-cai";
 const projects                = "ey7h6-4iaaa-aaaak-aepka-cai";
 const nfts_ichub              = "fdaor-cqaaa-aaaao-ai7nq-cai";
 const canisterNFTsCollections = "4nxsr-yyaaa-aaaaj-aaboq-cai";
+const reportsCanisterId       = "opcce-byaaa-aaaak-qcgda-cai";
 let whitelist = [canisterId, coreCanisterId, publicChatCanisterId, usergeekCanister, private_chats, canisterNFTsCollections,
-                nfts_ichub, images, projects];
+                nfts_ichub, images, projects, reportsCanisterId];
 const host = 'https://raw.ic0.app/';
 
 

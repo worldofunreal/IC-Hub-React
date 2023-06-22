@@ -49,7 +49,8 @@ export default function App(props){
             changeGroupTitle, changeGroupDescription, changeGroupPrivacy, getUserDataFromID, getUserFriends, 
             getUserPendingNotifications, setUserdataHub, acceptFriendRequest, rejectFriendRequest, messageUser, 
             requestFriendship, logUserActivity, searchUsers, changeUserDescription, setImageToUser, checkUserActivity,
-            getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, setCurrentSection, nftList, addNFTCollection
+            getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, setCurrentSection, nftList, addNFTCollection,
+            transferNft, addReport
         } = useContext(ChatAppContext);
     /// Local variables
     const [usergeekInitialized, setUsergeekInitialized] = useState(false);
@@ -334,13 +335,17 @@ export default function App(props){
         };
 
         unityContext.on("SetAvatarURL", (_url) => {
+            console.log("SetAvatarURL", _url);
             saveUserImage(_url);
         });
 
         const saveUserImage = async (img) => {
             //let img = "https://cdn3.iconfinder.com/data/icons/delivery-and-logistics/24/logistics-25-512.png";
-            let _uImg = await canister.setImageToUser(img, { "url": null });
-            await setImageToUser(img);
+            let _uImg;
+            if(img !== undefined && img !== null && img !== ""){
+                _uImg = await canister.setImageToUser(img, { "url": null });
+                await setImageToUser(img);
+            }
             console.log("_uImg", _uImg);
             unityContext.send("Canvas","OnAvatarReady", "");
         };
@@ -465,6 +470,25 @@ export default function App(props){
         window.location.reload();
     });
 
+    /// Tokens
+    unityContext.on("SendCrypto", (json) => {
+        console.log("DATA NFT SEND", json);
+        let _data = JSON.parse(json);
+        if(_data.isToken === false){
+            /// NFT
+            transferNft(_data.idToken, _data.web3Adress);
+        } else {
+            if(_data.isToken === true){
+                /// TOKEN
+            } else {
+                /// ERROR
+            }
+        }
+        /*
+            {"idToken":"f7wxw-aakor-uwiaa-aaaaa-deahc-qaqca-aaerv-q","quantityToken":"","web3Adress":"","isToken":false}
+        */
+    })
+
 
     //// Pk#1234 (Plug)  4fec8917ffd42657c22e82a59eb9ae9f48b8503125811059fc5bffd4c72c6d1f
     //// Pk#4321 (Stoic) fbaab62eb1b779036e885fa186b1abcba2e63571cd50de5ebdf209c79cd0113f
@@ -492,6 +516,8 @@ export default function App(props){
                 unityContext.send("AppManagement_Section", "GetImageNews", urlImage);
                 break;
             case "SetAvatarImage":
+                let _uImg = await canister.setImageToUser(urlImage, { "url": null });
+                await setImageToUser(urlImage);
                 unityContext.send("Canvas", "OnAvatarUploadReady", urlImage);
                 break;
         }
@@ -527,6 +553,12 @@ export default function App(props){
         openUploadImageProfile();
     });
 
+
+    /// REPORTS
+    unityContext.on("SendReport", (json) => {
+        addReport(JSON.parse(json));
+    });
+
     return(
         <>
             <Unity
@@ -545,8 +577,8 @@ export default function App(props){
             {/*<div>
                 <button onClick={() => { addNFTCollection("EXT", "ce2k4-aiaaa-aaaam-qa4ka-cai", "PAW Collection", "https://entrepot.app/marketplace/paw-collection"); }}>ADD PAW COLLECTION COLLECTION</button>
             </div>*/}
-            <div><button onClick={() => { getTokens() }}>GET TOKENS</button></div>
-            <div>{nftList}</div>
+            {/*<div><button onClick={() => { getTokens() }}>GET TOKENS</button></div>
+            <div>{nftList}</div>*/}
         </>
     );
 };

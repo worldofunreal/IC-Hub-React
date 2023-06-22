@@ -7,6 +7,7 @@ import { idlFactory as projectsIDL     } from "./projects";
 import { idlFactory as imagesIDL       } from "./images";
 import { idlFactory as extIDL          } from "./nfts_ichub";
 import { idlFactory as standardsIDL    } from "./nfts_standards";
+import { idlFactory as reportsIDL      } from "./reports";
 //import { idlFactory as idlExt } from "../../../declarations/ext_token/score_token.did";
 import { getAccountId } from "../functions/account";
 
@@ -41,6 +42,9 @@ const ChatICAppProvider = ({ children }) => {
   const [currentSection,   setCurrentSection]   = useState(null); /// The section of the Hub the user currently is
   const [nftList,          setNftList]          = useState(null); /// List of NFTs
   const [nftsCollCanister, setNFTsCollCanister] = useState(null); /// Canister for all the NFTs collections
+  const [allNftsCollData,  setAllNftsCollData]  = useState(null); /// All data from NFTs collections
+  const [userNFTsList,     setUserNFTsList]     = useState(null);
+  const [reportsCanister,  setReportsCanister]  = useState(null);
 
   
   /// The IC's host URL
@@ -51,6 +55,7 @@ const ChatICAppProvider = ({ children }) => {
   const canisterImagesId        = "avnm2-3aaaa-aaaaj-qacba-cai";
   const canisterNFTsICHUB       = "fdaor-cqaaa-aaaao-ai7nq-cai";
   const canisterNFTsCollections = "4nxsr-yyaaa-aaaaj-aaboq-cai";
+  const reportsCanisterId       = "opcce-byaaa-aaaak-qcgda-cai";
 
   useEffect(() => {
     switch(currentSection){
@@ -75,7 +80,6 @@ const ChatICAppProvider = ({ children }) => {
       default:
         break;
     }
-    console.log("currentSection", currentSection);
   }, [currentSection]);
 
   useEffect(() => { }, [chatCoreCanister]);
@@ -146,7 +150,13 @@ const ChatICAppProvider = ({ children }) => {
     }
   }, [unityApp]);
 
-  useEffect(() => {}, [extCanisters]);
+  useEffect(() => {
+    if(extCanisters !== null){
+      getTokens();
+    }
+  }, [extCanisters]);
+
+  useEffect(() => { }, [allNftsCollData]);
 
   const openSuccessPanel = () => {
     if(unityApp !== null){
@@ -336,7 +346,6 @@ const ChatICAppProvider = ({ children }) => {
       }
       /// After we have the array, it needs to be encapsuled into another json to be processed inside Unity3D
       _groupsUnity = "{\"data\":" + JSON.stringify(_groupsUnity) + "}";
-      console.log("Chat_Section", "GetGroups", _groupsUnity);
       if(unityApp !== null){
         unityApp.send("Chat_Section", "GetGroups", _groupsUnity);
       }
@@ -463,7 +472,6 @@ const ChatICAppProvider = ({ children }) => {
     let _ug;
     let _activity = chatCoreCanister.logUserActivity("Online", false);
     _lastActivity = new Date();
-    console.log("_lastActivity" ,_lastActivity);
     if(userGroups !== null && userGroups.length > 0){
       _ug = userGroups
     } else {
@@ -553,7 +561,6 @@ const ChatICAppProvider = ({ children }) => {
   const createGroup = async (groupData) => {
     let _isPrivate = (groupData.isPrivate.toUpperCase() === "TRUE") ? true : false;
     let _group = await chatCoreCanister.create_group(groupData.namegroup, _isPrivate, false, groupData.description);
-    console.log("Group created", _group);
     getUserGroups();
     openSuccessPanel();
   };
@@ -690,7 +697,6 @@ const ChatICAppProvider = ({ children }) => {
             memberSince       : _formatDate,
             rolePlayerProfile : _rolePlayerProfile,
         });
-        console.log("User json", _userJson);
         if(unityApp !== null){
           unityApp.send("CanvasPlayerProfile", "GetInfoPopupPlayer", _userJson);
         }
@@ -701,7 +707,6 @@ const ChatICAppProvider = ({ children }) => {
 
     const changeUserDescription = async (newDescription) => {
       let _newDesc = await chatCoreCanister.changeUserDescription(newDescription);
-      console.log("New description", _newDesc);
       openSuccessPanel();
       getUserDataFromID(userPrincipal.toString());
     };
@@ -807,6 +812,7 @@ const ChatICAppProvider = ({ children }) => {
         principalID : userPrincipal.toString(),
         avatar      : _avatar,
     });
+    console.log("_data", _data);
     if(unityApp !== null){
       unityApp.send("Hub_Panel", "GetUserInfo", _data);
     }
@@ -824,20 +830,18 @@ const ChatICAppProvider = ({ children }) => {
 
   const logUserActivity = async (_data) => {
     let _saveActivity = await chatCoreCanister.logUserActivity(getActivityEquivalent(_data), true);
-    console.log("_saveActivity", _saveActivity);
   };
 
   const getUsersActivity = async () => {
     let _getUsersActivity = await chatCoreCanister.getUsersActivity(userPrincipal);
-    console.log("User's activity", _getUsersActivity);
   };
 
   const setImageToUser = async (img) => {
     if(unityApp !== null){
       //unityApp.send("Canvas", "OnAvatarReady", "");
     }
-    //let _img = await chatCoreCanister.setImageToUser(img);
-    console.log("Img saved", img/*, _img*/);
+    let _img = await chatCoreCanister.setImageToUser(img);
+    console.log("Img saved", img, _img);
   };
 
   /// SEARCH USERS
@@ -860,7 +864,6 @@ const ChatICAppProvider = ({ children }) => {
     }
     _data.user_data = _resUsers;
     _data = JSON.stringify(_data);
-    console.log("_users found", _users, _data);
     unityApp.send("SearchUser Panel", "GetUser", _data);
   };
 
@@ -869,7 +872,6 @@ const ChatICAppProvider = ({ children }) => {
   ///// APPS
   const saveDataApp = async (data) => {
     let _prevData = await projectsCanister.getMyProject();
-    console.log("My project", _prevData);
     let _data = {
       id               : 0,
       name             : data.name,
@@ -890,16 +892,12 @@ const ChatICAppProvider = ({ children }) => {
     };
     //_data = "record " + JSON.stringify(_data);
     if(_prevData !== null && _prevData.length > 0){
-      console.log("DATA APP", _data);
       let _saveData = await projectsCanister.updateProject(parseInt(_prevData[0].id),_data);
-      console.log("UPDATE DATA", _saveData);
       if(_saveData[0] === true){
         openSuccessPanel();
       }
     } else {
-      console.log("DATA APP", _data);
       let _createData = await projectsCanister.createProject(_data);
-      console.log("CREATE DATA", _createData);
       if(_createData[0] === true){
         openSuccessPanel();
       }
@@ -923,7 +921,6 @@ const ChatICAppProvider = ({ children }) => {
         Banner         : _prevData[0].banner,
         Logo           : _prevData[0].logo,
       }
-      console.log("_prevDataProject", _data);
       if(unityApp !== null){
         unityApp.send("AppManagement_Section", "GetInfoApp", JSON.stringify(_data));
       }
@@ -931,7 +928,6 @@ const ChatICAppProvider = ({ children }) => {
   };
   
   const saveNews = async (data) => {
-    console.log(data);
     let _data = {
       newsId     : 0,
       imageNews  : data.imageNews,
@@ -941,7 +937,6 @@ const ChatICAppProvider = ({ children }) => {
       textButton : data.textButtonNews,
     };
     let _createNews = await projectsCanister.addNewsToProject(_data);
-    console.log("Saved news", _createNews);
     if(_createNews[0] === true){
       openSuccessPanel();
     }
@@ -953,9 +948,7 @@ const ChatICAppProvider = ({ children }) => {
   const sendProjectsData = async () => {
     let _projects = await projectsCanister.getAllProjects();
     let _favs     = await chatCoreCanister.getMyFavorites();
-    console.log("MY FAVS", _favs);
     let _allProjects = [];
-    console.log("_projects", _projects);
     for(let i = 0; i < _projects.length; i++){
       let u = _projects[i].user;
       let p = _projects[i].data;
@@ -995,12 +988,10 @@ const ChatICAppProvider = ({ children }) => {
       }
       _allProjects.push(_p);
     }
-    console.log("_allProjects", _allProjects);
     let _data = {
       data: _allProjects
     };
     _data = JSON.stringify(_data);
-    console.log(_data);
     if(unityApp !== null){
       unityApp.send("AppBrowser_Section","GetAppsInfo", _data);
     }
@@ -1036,10 +1027,10 @@ const ChatICAppProvider = ({ children }) => {
       _can = nftsCollCanister;
     }
     let _coll = await _can.getNftsCanisters();
+    setAllNftsCollData(_coll);
     let _list = _coll.map((c) => {
       return c[0].toString();
     });
-    console.log("LIST OF COLLECTIONS", _list);
     //_list.push(canisterNFTsICHUB);
     //_list.push("tnvo7-iaaaa-aaaah-qcy4q-cai");
     setExtCanisters(_list);
@@ -1054,12 +1045,12 @@ const ChatICAppProvider = ({ children }) => {
       addedBy : userPrincipal
     };
     let _added = await nftsCollCanister.addNFTCollection(_data);
-    console.log("ADDED", _added);
   };
 
   const getTokens = async () => {
     if(extCanisters.length > 0){
       let _userNfts = [];
+      let _userNFTsList = [];
       let _userAcc = getAccountId(userPrincipal, null);
       for(let i = 0; i < extCanisters.length; i++){
         let _can;
@@ -1070,47 +1061,84 @@ const ChatICAppProvider = ({ children }) => {
         };
         try{
           let _assets = await _can.getRegistry();
-          for(let j = 0; j < _assets.length; j++){
-            if(_assets[j][1] === _userAcc){
-              let _tid = computeTokenIdentifier(extCanisters[i], _assets[j][0]);
-              console.log("OWNS ", _assets[j]);
-              console.log("tid", _tid);
-              /*fetch(`https://${extCanisters[i]}.raw.ic0.app/&tokenid=${_tid}`).then(
-                res => console.log("Fetching", res.status)
-              );*/
-              let _url = `https://${extCanisters[i]}.raw.ic0.app/&tokenid=${_tid}`;
-              let _r = await fetch(_url);
-              let _i = await _r.text();
-              if(_i.includes("<image href=\"https:")){
-                let _s1 = _i.split("<image href=\"https:");
-                let _s2 = _s1[1].split("\"");
-                _url = _s2[0];
+          let _thisCollectionNFTs = [];
+          let _thisNftCollData = getNftsCollData(extCanisters[i]);
+          if(_thisNftCollData !== null){
+            for(let j = 0; j < _assets.length; j++){
+              if(_assets[j][1] === _userAcc){
+                let _tid = computeTokenIdentifier(extCanisters[i], _assets[j][0]);
+                let _url = `https://${extCanisters[i]}.raw.ic0.app/&tokenid=${_tid}`;
+                let _r = await fetch(_url);
+                let _i = await _r.text();
+                if(_i.includes("<image href=\"https:")){
+                  let _s1 = _i.split("<image href=\"https:");
+                  let _s2 = _s1[1].split("\"");
+                  _url = _s2[0];
+                }
+                _thisCollectionNFTs.push({
+                  nftName   : _thisNftCollData.name + " #" + (parseInt(j) + 1).toString(),
+                  nftAvatar : _url,
+                  nftUrl    : _url,
+                  nftID     : _tid
+                });
+                _userNFTsList.push({
+                  idNFT : _tid,
+                  can   : _can
+                });
+                /*_userNfts.push(
+                  <div>
+                    <img src={_url} width="100" height="100" />
+                    <button onClick={() => { transferNft(_tid, Principal.fromText("24brs-3kr62-c4smi-ptm26-ysspf-zbgrx-lfuux-4sb2b-23wfo-ojhey-rae"), _can); }}>Send</button>
+                  </div>
+                );*/
               }
-              console.log("_url", _url);
-              _userNfts.push(
-                <div>
-                  <img src={_url} width="100" height="100" />
-                  <button onClick={() => { transferNft(_tid, Principal.fromText("24brs-3kr62-c4smi-ptm26-ysspf-zbgrx-lfuux-4sb2b-23wfo-ojhey-rae"), _can); }}>Send</button>
-                </div>
-              );
+            }
+            if(_thisCollectionNFTs.length > 0){
+              _userNfts.push({
+                avatar         : "",
+                colectionName  : _thisNftCollData.name,
+                marketplaceURL : _thisNftCollData.marketplace,
+                canisterID     : _thisNftCollData.canisterID.toString(),
+                userNFTs       : _thisCollectionNFTs
+              });
             }
           }
-          setNftList(_userNfts);
+          //setNftList(_userNfts);
           //let _balance = await _can.getUserBalance(userPrincipal);
-          //console.log("BALANCE", _balance);
         }catch(err){
           console.log("ERROR GETTING BALANCE", err);
         }
       }
+      setUserNFTsList(_userNFTsList);
+      let _n = {
+        data : _userNfts
+      }
+      if(unityApp !== null){
+        unityApp.send("Hub_Panel", "GetCollectionInfo", JSON.stringify(_n));
+      }
     }
   };
 
-  const transferNft = async (tid, to, _can) => {
+  const getNftsCollData = (canID) => {
+    for(let i = 0; i < allNftsCollData.length; i++){
+      if(allNftsCollData[i][1].canisterID.toString() === canID){
+        return allNftsCollData[i][1];
+      }
+    }
+    return null;
+  };
+
+  const transferNft = async (tid, to) => {
+    let _can = getCan(tid);
+    if(_can === null){
+      console.log("false");
+      return false;
+    }
     //let memo = "Sent from IC HUB";
     let memo = [...new Uint8Array(Buffer.from("Sent from IC HUB", "utf-8"))];
     let _transferRequest = {
       from       : { principal : Principal.fromText(userPrincipal.toString()) },
-      to         : { principal : to },
+      to         : { principal : Principal.fromText(to) },
       token      : tid,
       amount     : 1,
       memo       : memo,
@@ -1121,10 +1149,51 @@ const ChatICAppProvider = ({ children }) => {
     try{
       let _transfer = await _can.transfer(_transferRequest);
       console.log("TRANSFER", _transfer);
+      getTokens();
+      openSuccessPanel();
     }catch(err){
       console.log("Error while transferring NFT", err);
     }
   };
+
+  const getCan = (tid) => {
+    if(userNFTsList !== null){
+      for(let i = 0; i < userNFTsList.length; i++){
+        if(userNFTsList[i].idNFT.toString() === tid){
+          return userNFTsList[i].can;
+        }
+      }
+    }
+    return null;
+  };
+  
+
+  const addReport = async(data) => {
+    let _can;
+    if(reportsCanister === null){
+      switch(walletSelected){
+        case "PlugWallet":
+          _can = await setCanisterExternalPlug(reportsIDL, reportsCanisterId);
+          setReportsCanister(_can);
+          break;
+      };
+    } else {
+      _can = reportsCanister;
+    }
+    let _date = new Date();
+    let _reportData = {
+        category     : data.categoryReport,
+        reportType   : data.reportType,
+        userReports  : userPrincipal,
+        reported     : data.idReported,
+        dateReported : _date.toLocaleString(),
+        reasonReport : data.reasonReport
+    }
+    let newReport =  await _can.addReport(_reportData);
+    if(newReport === true){
+      openSuccessPanel();
+    }
+  }
 
 
   const value = { setUnityApp, setWalletSelected, setCoreCanisterExternal, setUserPrincipal, setIdentityChat, setUsername, 
@@ -1134,7 +1203,7 @@ const ChatICAppProvider = ({ children }) => {
                   getUserPendingNotifications, acceptFriendRequest, rejectFriendRequest, messageUser, requestFriendship,
                   setUserdataHub, logUserActivity, getUsersActivity, searchUsers, changeUserDescription, setImageToUser,
                   checkUserActivity, getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, currentSection,
-                  setCurrentSection, nftList, addNFTCollection};
+                  setCurrentSection, nftList, addNFTCollection, transferNft, addReport};
 
   return <ChatAppContext.Provider value={value}>{children}</ChatAppContext.Provider>;
 };

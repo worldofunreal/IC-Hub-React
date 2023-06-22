@@ -1,0 +1,18 @@
+// Version: 1.0.0
+type ReportData =
+  {
+    category : Nat;
+    dateReported : Text;
+    reasonReport : Text;
+    reportType : Text;
+    reported : Text;
+    userReports : Principal
+  };
+type ReportData__1 = ReportData;
+type UserID = Principal;
+type UserID__1 = UserID;
+actor {
+  stable var _usersReports : [(UserID__1, [ReportData__1])];
+  stable var coreCanister : Principal;
+  stable var owner_ : Principal
+};

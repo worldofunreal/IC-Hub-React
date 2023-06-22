@@ -1,0 +1,23 @@
+type UserID = principal;
+type ReportData = 
+ record {
+   category: nat;
+   dateReported: nat64;
+   reasonReport: text;
+   reportType: text;
+   reported: text;
+   userReports: principal;
+ };
+service : {
+  addReport: (UserID, ReportData) -> (bool) query;
+  getAllReports: () -> (vec record {
+                              UserID;
+                              vec ReportData;
+                            }) query;
+  getAllReportsByCategory: (nat) ->
+   (vec record {
+          UserID;
+          vec ReportData;
+        }) query;
+  getUserReports: (UserID) -> (opt vec ReportData) query;
+}

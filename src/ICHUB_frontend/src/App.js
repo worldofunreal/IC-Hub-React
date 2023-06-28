@@ -1,5 +1,29 @@
+
+
+
+
+/**
+ * 
+ * 
+ * REVISAR LEAK DE MEMORIA RAM Y EXCESO DE USO DE CPU
+ * 
+ * HACER QUERY DESDE FRONTEND LA RECUPERACIÓN DE BALANCE DE ICP
+ * HACER QUE SE EMPIECE A RECUPERAR LA INFO DEL USUARIO INCLUSO ANTES DE ONHUBSCENE
+ * 
+ * 
+ */
+
+
+
+
+
+
+
+
+
 import React, { useEffect, useState, useContext } from 'react';
 import Unity, { UnityContext } from "react-unity-webgl";
+import { Principal } from '@dfinity/principal';
 import { loginII, handleAuthenticated, loginStoic, loginPlug, loginInfinityWallet, setCanisterData } from './functions/login';
 import { idlFactory as backendIDL } from '../../declarations/ICHUB_backend';
 import { fromHexString, toHexString } from "./functions/account";
@@ -8,6 +32,10 @@ import { ChatAppContext } from './chatSDK/chatAppContext';
 import { Usergeek } from "usergeek-ic-js";
 import axios from 'axios';
 import "./styles/main.css";
+import { AccountIdentifier, LedgerCanister } from "@dfinity/nns";
+import Lottie from "lottie-react";
+import loadingAnim from "./resources/loading_anim/hubanim.json";
+
 
 /// Add Unity build files to the project
 const chunkSize = 2000000;
@@ -44,7 +72,7 @@ export default function App(props){
     let { identity, setIdentity, canister, setCanister, walletPopup, setWalletPopup, walletService, setWalletService,
           saveSession, setSaveSession } = useContext(AppContext);
     /// Functions from the Chat context
-    let { setUnityApp, setWalletSelected, setCoreCanisterExternal, setUserPrincipal, setIdentityChat, setUsername, 
+    let { setUnityApp, setWalletSelected, setCoreCanisterExternal, userPrincipal, setUserPrincipal, setIdentityChat, setUsername, 
             searchGroup, createGroup, selectChat, leaveGroup, requestJoinGroup, acceptGroupRequest, rejectGroupRequest, 
             changeGroupTitle, changeGroupDescription, changeGroupPrivacy, getUserDataFromID, getUserFriends, 
             getUserPendingNotifications, setUserdataHub, acceptFriendRequest, rejectFriendRequest, messageUser, 
@@ -224,7 +252,7 @@ export default function App(props){
 
         unityContext.on("OnHubScene", () => {
             getICPBalance();
-            getICPFromAccount();
+            //getICPFromAccount();
             getUserFriends();
             getUserPendingNotifications();
             setUserdataHub();
@@ -283,6 +311,22 @@ export default function App(props){
         });
         unityContext.send("Hub_Panel", "GetTokensInfo", _tokens);
         let _icp = await canister.getICPBalance();
+        try{
+            let _p = Principal.fromText(userPrincipal.toString());//.toUint8Array();
+            console.log("_p", _p);
+            const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
+            // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
+            // console.log("WILL GET NEW ICP", accountIdentifier, "-");
+            // const ledger = LedgerCanister.create();
+            // /*const accountIdentifier = AccountIdentifier.fromHex(
+            //     "acedcf79daec4cb86dd7b44c53dd5111a81a006d26a63b8dd5e822b6fd711ad5"
+            // );*/
+            // const _newICP = await ledger.accountBalance({ accountIdentifier } );
+            // //const _newICP = await ledger.accountBalance( AccountIdentifier.fromPrincipal({principal: userPrincipal, subAccount: null}) , false);
+            // console.log("NEW ICP", _newICP);
+        }catch(err){
+            console.log("ERR ", err);
+        }
         let icp_dec = parseFloat(parseInt(_icp.e8s)) / 100000000;
         _tokens = JSON.stringify({
             data : [{
@@ -292,14 +336,18 @@ export default function App(props){
                 id     : 1,
             }]
         });
+        console.log('("Hub_Panel", "GetTokensInfo"', _tokens);
         unityContext.send("Hub_Panel", "GetTokensInfo", _tokens);
+        setTimeout(() => {
+            getICPBalance();
+        }, 15000);
     };
 
     const getICPFromAccount = async () => {
         let _icp = await canister.getBalanceFromAccount(fromHexString("acedcf79daec4cb86dd7b44c53dd5111a81a006d26a63b8dd5e822b6fd711ad5"));
         setBalance(parseInt(_icp.e8s) / 100000000);
         setTimeout(() => {
-            getICPFromAccount();
+            //getICPFromAccount();
         }, 15000);
     };
 
@@ -357,7 +405,7 @@ export default function App(props){
 
         const isUserInGroup = async (name) => {
             let _isUserInGroup = await searchGroup(name);
-            unityContext.send("SearchGroup Panel", "GetGroups", JSON.stringify(_isUserInGroup));
+            unityContext.send("CanvasSearchGroup", "GetGroups", JSON.stringify(_isUserInGroup));
         };
 
     /////// SELECT GROUPS
@@ -561,11 +609,20 @@ export default function App(props){
 
     return(
         <>
+            {
+            isLoaded !== true ?
+                <div className='loading-anim-div'>
+                    <Lottie animationData={loadingAnim} loop={true} className='loading-anim' />
+                </div>
+                :
+                <>
+                </>
+            }
             <Unity
                 unityContext = { unityContext }
                 style = {{
-                    height: "auto",
-                    width: "100%",
+                    height: "100vh",
+                    width: "100vw",
                 }} 
             />
             <br />

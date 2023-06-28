@@ -1,3 +1,16 @@
 .hide{
     display: none !important;
 }
+.loading-anim-div{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #1E1E1E;
+    padding-top: 25vh;
+}
+.loading-anim{
+    width: auto;
+    height: 50vh;
+}

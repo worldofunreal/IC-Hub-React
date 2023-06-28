@@ -34,6 +34,7 @@ const ChatICAppProvider = ({ children }) => {
   const [chatCoreCanister, setChatCoreCanister] = useState(null); /// The canister of the chat
   const [userGroups,       setUserGroups]       = useState(null); /// The user's groups list
   const [chatSelected,     setChatSelected]     = useState(null); /// The chat selected
+  const [chatMessages,     setChatMessages]     = useState(null);
   const [chatCanister,     setChatCanister]     = useState(null); /// The canister of the selected chat
   const [walletSelected,   setWalletSelected]   = useState(null); /// The wallet service selected by the user to login
   const [extCanisters,     setExtCanisters]     = useState(null); /// List of tokens on the EXT Standard
@@ -304,6 +305,7 @@ const ChatICAppProvider = ({ children }) => {
   const renderGroupsList = async () => {
     /// Once we have all user's groups we can display them
     let _userGroups = userGroups;
+    console.log("userGroups1", userGroups);
     if(_userGroups !== null && _userGroups !== undefined){
       /// First we sort them by ID asc
       _userGroups.sort((a, b) => { return (parseInt(a.groupID) - parseInt(b.groupID)) });
@@ -534,6 +536,7 @@ const ChatICAppProvider = ({ children }) => {
 
   const getUserGroups = async () => {
     let _userGroups = await chatCoreCanister.get_user_groups();
+    console.log("USER GROUPS", _userGroups);
     if(_userGroups !== null && _userGroups.length > 0){
       setUserGroups(_userGroups);
       if(_loadingGroups === false){
@@ -727,6 +730,7 @@ const ChatICAppProvider = ({ children }) => {
         userFriends.push(_uf);
       }
       if(unityApp !== null){
+        console.log('"Hub_Panel", "GetFriendsInfo"', "{\"data\":" + JSON.stringify(userFriends) + "}");
         unityApp.send("Hub_Panel", "GetFriendsInfo", "{\"data\":" + JSON.stringify(userFriends) + "}");
       }
     };
@@ -751,7 +755,7 @@ const ChatICAppProvider = ({ children }) => {
           notifications : []
         });
         if(unityApp !== null){
-          unityApp.send("FriendRequest Panel", "GetInfoNotificationPanel", _upf);
+          unityApp.send("CanvasNotificationRequests", "GetInfoNotificationPanel", _upf);
         }
       }
       setTimeout(() => {
@@ -812,9 +816,10 @@ const ChatICAppProvider = ({ children }) => {
         principalID : userPrincipal.toString(),
         avatar      : _avatar,
     });
-    console.log("_data", _data);
+    //console.log("_data", _data);
     if(unityApp !== null){
       unityApp.send("Hub_Panel", "GetUserInfo", _data);
+      console.log('"Hub_Panel", "GetUserInfo"', _data);
     }
   };
 
@@ -864,7 +869,7 @@ const ChatICAppProvider = ({ children }) => {
     }
     _data.user_data = _resUsers;
     _data = JSON.stringify(_data);
-    unityApp.send("SearchUser Panel", "GetUser", _data);
+    unityApp.send("CanvasSearchUser", "GetUser", _data);
   };
 
 
@@ -948,22 +953,27 @@ const ChatICAppProvider = ({ children }) => {
   const sendProjectsData = async () => {
     let _projects = await projectsCanister.getAllProjects();
     let _favs     = await chatCoreCanister.getMyFavorites();
+    console.log("p,f", _projects, _favs);
     let _allProjects = [];
     for(let i = 0; i < _projects.length; i++){
       let u = _projects[i].user;
       let p = _projects[i].data;
       let n = _projects[i].news[0];
       let _n = [];
-      for(let j = 0; j < n.length; j++){
-        _n.push({
-          "imageNews": n[j].imageNews,
-          "title": n[j].title,
-          "content": n[j].content,
-          "linkButton": n[j].linkButton,
-          "textButton": n[j].textButton
-        });
+      if(n !== undefined && n.length > 0){
+        for(let j = 0; j < n.length; j++){
+          let _linkButton = (n[j].linkButton.split("https://").length > 0) ? n[j].linkButton : "https://" + n[j].linkButton;
+          _n.push({
+            "imageNews": n[j].imageNews,
+            "title": n[j].title,
+            "content": n[j].content,
+            "linkButton": _linkButton,
+            "textButton": n[j].textButton
+          });
+        }
       }
       let _fav = getIsFavorite(u, _favs);
+      let _launchLink = (p.launchLink.split("https://").length > 1) ? p.launchLink : "https://" + p.launchLink;
       let _p = {
         "id": parseInt(p.id),
         "name": p.name,
@@ -981,7 +991,7 @@ const ChatICAppProvider = ({ children }) => {
         "nftCollections": p.nftCollections.collections,
         "newVersion": p.newVersion,
         "currentVersion": p.currentVersion,
-        "launchLink": p.launchLink,
+        "launchLink": _launchLink,
         "listNews": _n,
         "isFavorite" : _fav.isFavorite,
         "favAppOrder" : _fav.favAppOrder
@@ -993,6 +1003,7 @@ const ChatICAppProvider = ({ children }) => {
     };
     _data = JSON.stringify(_data);
     if(unityApp !== null){
+      console.log('"AppBrowser_Section","GetAppsInfo"', _data);
       unityApp.send("AppBrowser_Section","GetAppsInfo", _data);
     }
   };
@@ -1196,8 +1207,8 @@ const ChatICAppProvider = ({ children }) => {
   }
 
 
-  const value = { setUnityApp, setWalletSelected, setCoreCanisterExternal, setUserPrincipal, setIdentityChat, setUsername, 
-                  searchGroup, createGroup, addUserToGroup, selectChat, leaveGroup, userPrincipal, userGroups, 
+  const value = { setUnityApp, setWalletSelected, setCoreCanisterExternal, userPrincipal, setUserPrincipal, setIdentityChat, setUsername, 
+                  searchGroup, createGroup, addUserToGroup, selectChat, leaveGroup, userGroups, 
                   requestJoinGroup, getGroupUsers, transferOwner, acceptGroupRequest, rejectGroupRequest, 
                   changeGroupDescription, changeGroupTitle, changeGroupPrivacy, getUserDataFromID, getUserFriends,
                   getUserPendingNotifications, acceptFriendRequest, rejectFriendRequest, messageUser, requestFriendship,

@@ -251,6 +251,7 @@ export default function App(props){
         };
 
         unityContext.on("OnHubScene", () => {
+            prepHUB();
             getICPBalance();
             //getICPFromAccount();
             getUserFriends();
@@ -258,6 +259,56 @@ export default function App(props){
             setUserdataHub();
             checkUserActivity();
         });
+
+        const prepHUB = () => {
+            /// Tokens
+            let _tokens = JSON.stringify({
+                data : [{
+                    avatar : "https://logos-download.com/wp-content/uploads/2022/01/Internet_Computer_Logo.png",
+                    name   : "ICP",
+                    value  : "Loading...",
+                    id     : "ICP",
+                }]
+            });
+            /// Friends
+            let userFriends = [];
+            let _uf = {
+                avatar      : "",
+                name        : "...",
+                status      : "",
+                principalID : "",
+            };
+            userFriends.push(_uf);
+            /// Collections
+            let _userNfts = [];
+            let _userNFTsList = [];
+            let _thisCollectionNFTs = [];
+            //// let _userAcc = getAccountId(userPrincipal, null);
+            _thisCollectionNFTs.push({
+                nftName   : "Loading...",
+                nftAvatar : "",
+                nftUrl    : "",
+                nftID     : ""
+              });
+              _userNFTsList.push({
+                idNFT : "",
+                can   : ""
+              });
+            _userNfts.push({
+              avatar         : "",
+              colectionName  : "Loading...",
+              marketplaceURL : "",
+              canisterID     : "",
+              userNFTs       : ""
+            });
+            let _n = {
+              data : _userNfts
+            }
+            /// Send pre-data
+            unityContext.send("Hub_Panel", "GetTokensInfo", _tokens);
+            unityContext.send("Hub_Panel", "GetFriendsInfo", "{\"data\":" + JSON.stringify(userFriends) + "}");
+            unityContext.send("Hub_Panel", "GetCollectionInfo", JSON.stringify(_n));
+        };
 
         ///Plug wallet
         const generatePlugCan = async () => {
@@ -301,43 +352,43 @@ export default function App(props){
 
     ///////// ICP //////////
     const getICPBalance = async () => {
-        let _tokens = JSON.stringify({
-            data : [{
-                avatar : "https://logos-download.com/wp-content/uploads/2022/01/Internet_Computer_Logo.png",
-                name   : "ICP",
-                value  : "Loading...",
-                id     : 1,
-            }]
-        });
-        unityContext.send("Hub_Panel", "GetTokensInfo", _tokens);
-        let _icp = await canister.getICPBalance();
-        try{
-            let _p = Principal.fromText(userPrincipal.toString());//.toUint8Array();
-            console.log("_p", _p);
-            const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
-            // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
-            // console.log("WILL GET NEW ICP", accountIdentifier, "-");
-            // const ledger = LedgerCanister.create();
-            // /*const accountIdentifier = AccountIdentifier.fromHex(
-            //     "acedcf79daec4cb86dd7b44c53dd5111a81a006d26a63b8dd5e822b6fd711ad5"
-            // );*/
-            // const _newICP = await ledger.accountBalance({ accountIdentifier } );
-            // //const _newICP = await ledger.accountBalance( AccountIdentifier.fromPrincipal({principal: userPrincipal, subAccount: null}) , false);
-            // console.log("NEW ICP", _newICP);
-        }catch(err){
-            console.log("ERR ", err);
+        if(userPrincipal !== undefined){
+            console.log("BEFORE CANISTER", new Date());
+            let _icp = await canister.getICPBalance();
+            console.log("AFTER CANISTER", new Date());
+            console.log("USER PRINCIPAL");
+            console.log(userPrincipal);
+            try{
+                const ledger = LedgerCanister.create();
+                const accID  = await canister.mySubaccount();
+                console.log("accID", accID);
+
+                // let _p = Principal.fromText(userPrincipal.toString());//.toUint8Array();
+                // console.log("_p", _p);
+                // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
+                // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
+                // console.log("WILL GET NEW ICP", accountIdentifier, "-");
+                // /*const accountIdentifier = AccountIdentifier.fromHex(
+                //     "acedcf79daec4cb86dd7b44c53dd5111a81a006d26a63b8dd5e822b6fd711ad5"
+                // );*/
+                const _newICP = await ledger.accountBalance( { accID } );
+                // //const _newICP = await ledger.accountBalance( AccountIdentifier.fromPrincipal({principal: userPrincipal, subAccount: null}) , false);
+                console.log("NEW ICP", _newICP);
+            }catch(err){
+                console.log("ERR ", err);
+            }
+            let icp_dec = parseFloat(parseInt(_icp.e8s)) / 100000000;
+            _tokens = JSON.stringify({
+                data : [{
+                    avatar : "https://logos-download.com/wp-content/uploads/2022/01/Internet_Computer_Logo.png",
+                    name   : "ICP",
+                    value  : icp_dec,
+                    id     : 1,
+                }]
+            });
+            console.log('("Hub_Panel", "GetTokensInfo"', _tokens);
+            unityContext.send("Hub_Panel", "GetTokensInfo", _tokens);
         }
-        let icp_dec = parseFloat(parseInt(_icp.e8s)) / 100000000;
-        _tokens = JSON.stringify({
-            data : [{
-                avatar : "https://logos-download.com/wp-content/uploads/2022/01/Internet_Computer_Logo.png",
-                name   : "ICP",
-                value  : icp_dec,
-                id     : 1,
-            }]
-        });
-        console.log('("Hub_Panel", "GetTokensInfo"', _tokens);
-        unityContext.send("Hub_Panel", "GetTokensInfo", _tokens);
         setTimeout(() => {
             getICPBalance();
         }, 15000);
@@ -543,6 +594,7 @@ export default function App(props){
 
     const readFile = async (files) => {
         let file = files[0];
+        window.removeEventListener('focus', handleFocusBack);
         if(file.size > chunkSize){
             alert("File too big. Max size is 2 MB");
             return false;
@@ -607,6 +659,16 @@ export default function App(props){
         addReport(JSON.parse(json));
     });
 
+    /// Input callback
+    const addCallback = () => {
+        window.addEventListener('focus', handleFocusBack);
+    }
+
+    const handleFocusBack = () => {
+        console.log("CLOSE POPUP");
+        window.removeEventListener('focus', handleFocusBack);
+    }
+
     return(
         <>
             {
@@ -629,7 +691,7 @@ export default function App(props){
             <label>{/*balance*/}</label>
             <br />
             <div className='hide'>
-                <input type="file" id="new-file" accept="image/*" onChange={(e)=>{ readFile(e.target.files); }} />
+                <input onClick={() => { addCallback(); }} type="file" id="new-file" accept="image/*" onChange={(e)=>{ readFile(e.target.files); }} />
             </div>
             {/*<div>
                 <button onClick={() => { addNFTCollection("EXT", "ce2k4-aiaaa-aaaam-qa4ka-cai", "PAW Collection", "https://entrepot.app/marketplace/paw-collection"); }}>ADD PAW COLLECTION COLLECTION</button>

@@ -93,7 +93,7 @@ const ChatICAppProvider = ({ children }) => {
     const diffTime = (_lastActivity !== null) ?  Math.abs(_now - _lastActivity) : 0;
     if(diffTime > 60000 && userPrincipal !== null){
       let _getUserStatus = await chatCoreCanister.getUsersActivity(userPrincipal);
-      if(_getUserStatus !== "Away"){
+      if(_getUserStatus === "Online"){
         await chatCoreCanister.logUserActivity("Away", false);
         setUserdataHub();
       }
@@ -736,27 +736,26 @@ const ChatICAppProvider = ({ children }) => {
     };
 
     const getUserPendingNotifications = async () => {
-      if(currentSection === 0){
-        //let _userFriends = await chatCoreCanister.getFriendListData();
-        let _userPendingFriends = await chatCoreCanister.getMyFriendRequests();
-        let _upf = [];
-        for(let i = 0; i < _userPendingFriends.length; i++){
-          let _friendUsername = _userPendingFriends[i].username.split("#");
-          _friendUsername = _friendUsername[0];
-          let _uf = {
-            avatarUser  : _userPendingFriends[i].avatar,
-            username    : _friendUsername,
-            principalID : _userPendingFriends[i].userID.toString(),
-          };
-          _upf.push(_uf);
-        }
-        _upf = JSON.stringify({
-          requests      : _upf,
-          notifications : []
-        });
-        if(unityApp !== null){
-          unityApp.send("CanvasNotificationRequests", "GetInfoNotificationPanel", _upf);
-        }
+      //let _userFriends = await chatCoreCanister.getFriendListData();
+      let _userPendingFriends = await chatCoreCanister.getMyFriendRequests();
+      let _upf = [];
+      for(let i = 0; i < _userPendingFriends.length; i++){
+        let _friendUsername = _userPendingFriends[i].username.split("#");
+        _friendUsername = _friendUsername[0];
+        let _uf = {
+          avatarUser  : _userPendingFriends[i].avatar,
+          username    : _friendUsername,
+          principalID : _userPendingFriends[i].userID.toString(),
+        };
+        _upf.push(_uf);
+      }
+      _upf = JSON.stringify({
+        requests      : _upf,
+        notifications : []
+      });
+      if(unityApp !== null){
+        console.log("CanvasNotificationRequests", "GetInfoNotificationPanel", _upf);
+        unityApp.send("CanvasNotificationRequests", "GetInfoNotificationPanel", _upf);
       }
       setTimeout(() => {
         getUserPendingNotifications();
@@ -1003,7 +1002,7 @@ const ChatICAppProvider = ({ children }) => {
     };
     _data = JSON.stringify(_data);
     if(unityApp !== null){
-      console.log('"AppBrowser_Section","GetAppsInfo"', _data);
+      //console.log('"AppBrowser_Section","GetAppsInfo"', _data);
       unityApp.send("AppBrowser_Section","GetAppsInfo", _data);
     }
   };
@@ -1079,13 +1078,13 @@ const ChatICAppProvider = ({ children }) => {
               if(_assets[j][1] === _userAcc){
                 let _tid = computeTokenIdentifier(extCanisters[i], _assets[j][0]);
                 let _url = `https://${extCanisters[i]}.raw.ic0.app/&tokenid=${_tid}`;
-                let _r = await fetch(_url);
+                /*let _r = await fetch(_url);
                 let _i = await _r.text();
                 if(_i.includes("<image href=\"https:")){
                   let _s1 = _i.split("<image href=\"https:");
                   let _s2 = _s1[1].split("\"");
                   _url = _s2[0];
-                }
+                }*/
                 _thisCollectionNFTs.push({
                   nftName   : _thisNftCollData.name + " #" + (parseInt(j) + 1).toString(),
                   nftAvatar : _url,

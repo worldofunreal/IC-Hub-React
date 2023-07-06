@@ -78,7 +78,7 @@ export default function App(props){
             getUserPendingNotifications, setUserdataHub, acceptFriendRequest, rejectFriendRequest, messageUser, 
             requestFriendship, logUserActivity, searchUsers, changeUserDescription, setImageToUser, checkUserActivity,
             getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, setCurrentSection, nftList, addNFTCollection,
-            transferNft, addReport
+            transferNft, addReport, openSuccessPanel
         } = useContext(ChatAppContext);
     /// Local variables
     const [usergeekInitialized, setUsergeekInitialized] = useState(false);
@@ -378,7 +378,7 @@ export default function App(props){
                 console.log("ERR ", err);
             }
             let icp_dec = parseFloat(parseInt(_icp.e8s)) / 100000000;
-            _tokens = JSON.stringify({
+            let _tokens = JSON.stringify({
                 data : [{
                     avatar : "https://logos-download.com/wp-content/uploads/2022/01/Internet_Computer_Logo.png",
                     name   : "ICP",
@@ -471,7 +471,7 @@ export default function App(props){
     const joinGroup = async (groupID) => {
         let _requested = await requestJoinGroup(groupID);
         if(_requested[0] === true){
-            unityContext.send("CanvasPopup", "OpenSuccessPanel", "");
+            openSuccessPanel();
         } else {
             console.log("Error while trying to add user to group", _requested[1]);
             alert("Error while trying to add user to group");
@@ -615,9 +615,21 @@ export default function App(props){
                 await setImageToUser(urlImage);
                 unityContext.send("Canvas", "OnAvatarUploadReady", urlImage);
                 break;
+            case "SetAvatarImageFromProfile":
+                let _newI = await setImageToUser(urlImage);
+                if(_newI === true){
+                    openSuccessPanel();
+                    setUserdataHub();
+                }
+                break;
         }
         setImageLoadingSection(null);
     };
+
+    unityContext.on("SetAvatarImageFromProfile", () => {
+        setImageLoadingSection("SetAvatarImageFromProfile");
+        openUploadImageProfile();
+    });
 
     unityContext.on("SetAvatarImage", () => {
         setImageLoadingSection("SetAvatarImage");

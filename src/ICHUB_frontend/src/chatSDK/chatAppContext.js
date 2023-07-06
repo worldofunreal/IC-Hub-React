@@ -268,7 +268,7 @@ const ChatICAppProvider = ({ children }) => {
 
   const loginUser = async () => {
     /// Get user if exists or create new one
-    if(userPrincipal !== null){
+    if(userPrincipal !== null && chatCoreCanister !== null){
       let _user = await chatCoreCanister.get_user(userPrincipal);
       if(_user === null || _user === [] || _user.length <= 0){
         let _newUser = await chatCoreCanister.create_user_profile(username, "");
@@ -861,6 +861,7 @@ const ChatICAppProvider = ({ children }) => {
     }
     let _img = await chatCoreCanister.setImageToUser(img);
     console.log("Img saved", img, _img);
+    return _img;
   };
 
   /// SEARCH USERS
@@ -1228,7 +1229,7 @@ const ChatICAppProvider = ({ children }) => {
                   getUserPendingNotifications, acceptFriendRequest, rejectFriendRequest, messageUser, requestFriendship,
                   setUserdataHub, logUserActivity, searchUsers, changeUserDescription, setImageToUser,
                   checkUserActivity, getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, currentSection,
-                  setCurrentSection, nftList, addNFTCollection, transferNft, addReport};
+                  setCurrentSection, nftList, addNFTCollection, transferNft, addReport, openSuccessPanel};
 
   return <ChatAppContext.Provider value={value}>{children}</ChatAppContext.Provider>;
 };

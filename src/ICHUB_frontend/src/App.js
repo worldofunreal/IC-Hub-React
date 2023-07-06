@@ -553,12 +553,6 @@ export default function App(props){
         logUserActivity(_data);
     });
 
-    /*
-    unityContext.on("getUsersActivity", () => {
-        getUsersActivity();
-    });
-    */
-
     /// Search Users
     unityContext.on("SearchUser", (wordToSearch) => {
         searchUsers(wordToSearch);
@@ -595,6 +589,7 @@ export default function App(props){
     const readFile = async (files) => {
         let file = files[0];
         window.removeEventListener('focus', handleFocusBack);
+        unityContext.send("Canvas", "OnAvatarUploadLoading", "");
         if(file.size > chunkSize){
             alert("File too big. Max size is 2 MB");
             return false;

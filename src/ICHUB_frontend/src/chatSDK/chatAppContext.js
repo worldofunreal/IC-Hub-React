@@ -93,13 +93,13 @@ const ChatICAppProvider = ({ children }) => {
     const diffTime = (_lastActivity !== null) ?  Math.abs(_now - _lastActivity) : 0;
     if(diffTime > 60000 && userPrincipal !== null){
       let _getUserStatus = await chatCoreCanister.getUsersActivity(userPrincipal);
-      if(_getUserStatus === "Online"){
+      if(_getUserStatus === "Avaliable"){
         await chatCoreCanister.logUserActivity("Away", false);
         setUserdataHub();
       }
     }
     setTimeout(() => {
-      checkUserActivity();
+      ///checkUserActivity();
     }, 10000);
   };
 
@@ -431,6 +431,7 @@ const ChatICAppProvider = ({ children }) => {
       };
       data = JSON.stringify(data);
       if(unityApp !== null){
+        console.log("GetInfoPanelSettings", data);
         unityApp.send("SettingGroup Panel", "GetInfoPanelSettings", data);
       }
     }
@@ -472,7 +473,7 @@ const ChatICAppProvider = ({ children }) => {
 
   const selectChat = async (groupID) => {
     let _ug;
-    let _activity = chatCoreCanister.logUserActivity("Online", false);
+    //let _activity = chatCoreCanister.logUserActivity("Online", false);
     _lastActivity = new Date();
     if(userGroups !== null && userGroups.length > 0){
       _ug = userGroups
@@ -808,7 +809,9 @@ const ChatICAppProvider = ({ children }) => {
   const setUserdataHub = async () => {
     let _avatar = await chatCoreCanister.getUserAvatar(userPrincipal);
     let _status = await chatCoreCanister.getUsersActivity(userPrincipal);
-    _status = (_status.length > 0 && _status[0] !== "") ? _status[0] : "Online";
+    console.log("USER STATUS ON CANISTER", _status);
+    _status = (_status.length > 0 && _status[0] !== "") ? getUnityStatusEquivalent(_status) : "Avaliable";
+    console.log("TO UNITY", _status);
     let _data = JSON.stringify({
         username    : username,
         userState   : _status,
@@ -822,10 +825,21 @@ const ChatICAppProvider = ({ children }) => {
     }
   };
 
+  const getUnityStatusEquivalent = (_id) => {
+    console.log("TO UPPER CASE", _id.toUpperCase());
+    switch(_id.toUpperCase()){
+      case "AVALIABLE"       : return 0;
+      case "DO NOT DISTURBE" : return 1;
+      case "AWAY"            : return 2;
+      case "OFFLINE"         : return 3;
+      default                : return 3;
+    }
+  };
+
   const getActivityEquivalent = (_id) => {
     switch(_id){
       case 0: return "Avaliable";
-      case 1: return "Do Not Disturb";
+      case 1: return "Do not disturbe";
       case 2: return "Away";
       case 3: return "Offline";
       default: return _id;
@@ -834,10 +848,11 @@ const ChatICAppProvider = ({ children }) => {
 
   const logUserActivity = async (_data) => {
     let _saveActivity = await chatCoreCanister.logUserActivity(getActivityEquivalent(_data), true);
-  };
-
-  const getUsersActivity = async () => {
-    let _getUsersActivity = await chatCoreCanister.getUsersActivity(userPrincipal);
+    console.log("SAVE USER ACTIVITY STATUS", getActivityEquivalent(_data), _saveActivity);
+    if(_saveActivity[0] === true){
+      setUserdataHub();
+      openSuccessPanel();
+    }
   };
 
   const setImageToUser = async (img) => {
@@ -1211,7 +1226,7 @@ const ChatICAppProvider = ({ children }) => {
                   requestJoinGroup, getGroupUsers, transferOwner, acceptGroupRequest, rejectGroupRequest, 
                   changeGroupDescription, changeGroupTitle, changeGroupPrivacy, getUserDataFromID, getUserFriends,
                   getUserPendingNotifications, acceptFriendRequest, rejectFriendRequest, messageUser, requestFriendship,
-                  setUserdataHub, logUserActivity, getUsersActivity, searchUsers, changeUserDescription, setImageToUser,
+                  setUserdataHub, logUserActivity, searchUsers, changeUserDescription, setImageToUser,
                   checkUserActivity, getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, currentSection,
                   setCurrentSection, nftList, addNFTCollection, transferNft, addReport};
 

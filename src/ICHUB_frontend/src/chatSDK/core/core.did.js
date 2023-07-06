@@ -109,7 +109,7 @@ export const idlFactory = ({ IDL }) => {
     'getMyFriendRequests' : IDL.Func([], [IDL.Vec(UserFriendData)], ['query']),
     'getMyFriends' : IDL.Func([], [IDL.Vec(UserFriendData)], ['query']),
     'getPrivateChat' : IDL.Func([UserID__1], [IDL.Nat, IDL.Bool], ['query']),
-    'getUserAvatar' : IDL.Func([UserID__1], [IDL.Text], []),
+    'getUserAvatar' : IDL.Func([UserID__1], [IDL.Text], ['query']),
     'getUserGroupsAdmin' : IDL.Func(
         [UserID__1],
         [IDL.Opt(UserGroups)],

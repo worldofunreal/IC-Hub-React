@@ -725,7 +725,7 @@ const ChatICAppProvider = ({ children }) => {
         let _uf = {
           avatar      : _userFriends[i].avatar,
           name        : _friendUsername,
-          status      : _userFriends[i].status,
+          status      : getUnityStatusEquivalent(_userFriends[i].status),
           principalID : _userFriends[i].userID.toString(),
         };
         userFriends.push(_uf);
@@ -1222,8 +1222,8 @@ const ChatICAppProvider = ({ children }) => {
   }
 
 
-  const value = { setUnityApp, setWalletSelected, setCoreCanisterExternal, userPrincipal, setUserPrincipal, setIdentityChat, setUsername, 
-                  searchGroup, createGroup, addUserToGroup, selectChat, leaveGroup, userGroups, 
+  const value = { setUnityApp, setWalletSelected, setCoreCanisterExternal, userPrincipal, setUserPrincipal, setIdentityChat, 
+                  setUsername, searchGroup, createGroup, addUserToGroup, selectChat, leaveGroup, userGroups, 
                   requestJoinGroup, getGroupUsers, transferOwner, acceptGroupRequest, rejectGroupRequest, 
                   changeGroupDescription, changeGroupTitle, changeGroupPrivacy, getUserDataFromID, getUserFriends,
                   getUserPendingNotifications, acceptFriendRequest, rejectFriendRequest, messageUser, requestFriendship,

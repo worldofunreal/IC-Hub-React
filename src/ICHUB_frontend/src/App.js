@@ -394,6 +394,12 @@ export default function App(props){
         }, 15000);
     };
 
+    const sendICP = async (amount, to) => {
+        console.log("SEND ICP", amount, to);
+        //let _sent = await canister.sendICP(amount, to);
+        console.log("SENT ICP");
+    }
+
     const getICPFromAccount = async () => {
         let _icp = await canister.getBalanceFromAccount(fromHexString("acedcf79daec4cb86dd7b44c53dd5111a81a006d26a63b8dd5e822b6fd711ad5"));
         setBalance(parseInt(_icp.e8s) / 100000000);
@@ -573,6 +579,11 @@ export default function App(props){
         } else {
             if(_data.isToken === true){
                 /// TOKEN
+                if(_data.idToken === "ICP" || _data.idToken === 1 || _data.idToken === "1"){
+                    sendICP(_data.quantityToken, _data.web3Adress);
+                } else {
+                    alert("Token not supported yet");
+                }
             } else {
                 /// ERROR
             }
@@ -589,10 +600,17 @@ export default function App(props){
     const readFile = async (files) => {
         let file = files[0];
         window.removeEventListener('focus', handleFocusBack);
-        unityContext.send("Canvas", "OnAvatarUploadLoading", "");
         if(file.size > chunkSize){
             alert("File too big. Max size is 2 MB");
             return false;
+        }
+        switch(imageLoadingSection){
+            case "SetAvatarImage":
+                unityContext.send("Canvas", "OnAvatarUploadLoading", "");
+                break;
+            case "SetAvatarImageFromProfile":
+                unityContext.send("CanvasPlayerProfile", "OnAvatarUploadLoading", "");
+                break;
         }
         let _u = await canisterImages.saveImage([...new Uint8Array(await file.arrayBuffer())], file.type);
         let urlImage = "https://" + canisterImagesId + ".raw.ic0.app/img=" + _u[1];
@@ -620,6 +638,7 @@ export default function App(props){
                 if(_newI === true){
                     openSuccessPanel();
                     setUserdataHub();
+                    getUserDataFromID(userPrincipal.toString());
                 }
                 break;
         }

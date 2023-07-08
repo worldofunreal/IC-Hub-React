@@ -15,7 +15,17 @@
 
 
 
-
+/*
+*
+*
+*
+* NECESITO HACER QUE EL ENVIO DE ICP SEA TANTO A PRINCIPAL COMO ADDRESS
+* HACER PRUEBAS DE ENVIO DE ICP
+* PEGAR EN LOS INPUTS
+*
+*
+*
+*/
 
 
 
@@ -78,7 +88,7 @@ export default function App(props){
             getUserPendingNotifications, setUserdataHub, acceptFriendRequest, rejectFriendRequest, messageUser, 
             requestFriendship, logUserActivity, searchUsers, changeUserDescription, setImageToUser, checkUserActivity,
             getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, setCurrentSection, nftList, addNFTCollection,
-            transferNft, addReport, openSuccessPanel
+            transferNft, addReport, openSuccessPanel, userAccountID, setUserAccountID
         } = useContext(ChatAppContext);
     /// Local variables
     const [usergeekInitialized, setUsergeekInitialized] = useState(false);
@@ -252,6 +262,7 @@ export default function App(props){
 
         unityContext.on("OnHubScene", () => {
             prepHUB();
+            getUserAccID();
             getICPBalance();
             //getICPFromAccount();
             getUserFriends();
@@ -259,6 +270,16 @@ export default function App(props){
             setUserdataHub();
             checkUserActivity();
         });
+
+        const getUserAccID = async () => {
+            try{
+                let _accID  = await canister.mySubaccount();
+                console.log("mySubaccount", _accID, toHexString(_accID));
+                setUserAccountID(_accID);
+            } catch(err){
+                console.log("ERR mySubaccount", err);
+            }
+        }
 
         const prepHUB = () => {
             /// Tokens
@@ -395,9 +416,19 @@ export default function App(props){
     };
 
     const sendICP = async (amount, to) => {
-        console.log("SEND ICP", amount, to);
-        //let _sent = await canister.sendICP(amount, to);
-        console.log("SENT ICP");
+        if(amount > 0){
+            let _amount = amount * 1000000;
+            console.log("SEND ICP", _amount, to);
+            try{
+                let _sent = await canister.sendICP(_amount, to);
+                console.log("SENT ICP", _sent);
+            } catch(err){
+                console.log("ERROR WHILE SENDING ICP", err);
+                alert("ERROR WHILE SENDING ICP, PLEASE CHECK THE ADDRESS AND AMOUNT AND TRY AGAIN");
+            }
+        } else {
+            console.log("INVALID ICP AMOUNT");
+        }
     }
 
     const getICPFromAccount = async () => {

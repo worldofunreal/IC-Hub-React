@@ -29,6 +29,7 @@ const ChatICAppProvider = ({ children }) => {
   /// Definitions
   const [unityApp,         setUnityApp]         = useState(null); /// unityApp
   const [userPrincipal,    setUserPrincipal]    = useState(null); /// User's principal
+  const [userAccountID,    setUserAccountID]    = useState(null);
   const [username,         setUsername]         = useState(null); /// Username
   const [identity,         setIdentityChat]     = useState(null); /// An identity of the user logged in
   const [chatCoreCanister, setChatCoreCanister] = useState(null); /// The canister of the chat
@@ -1229,7 +1230,8 @@ const ChatICAppProvider = ({ children }) => {
                   getUserPendingNotifications, acceptFriendRequest, rejectFriendRequest, messageUser, requestFriendship,
                   setUserdataHub, logUserActivity, searchUsers, changeUserDescription, setImageToUser,
                   checkUserActivity, getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, currentSection,
-                  setCurrentSection, nftList, addNFTCollection, transferNft, addReport, openSuccessPanel};
+                  setCurrentSection, nftList, addNFTCollection, transferNft, addReport, openSuccessPanel,
+                  userAccountID, setUserAccountID};
 
   return <ChatAppContext.Provider value={value}>{children}</ChatAppContext.Provider>;
 };

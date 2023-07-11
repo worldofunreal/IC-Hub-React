@@ -10,6 +10,10 @@ export interface ChatGroups {
   'getUsersPending' : ActorMethod<[], Array<RequestJoinData>>,
   'get_group_users' : ActorMethod<[], Array<FullUserData>>,
   'get_messages' : ActorMethod<[], Array<[MessageID, MessageData]>>,
+  'get_messages_paginated' : ActorMethod<
+    [bigint, bigint],
+    Array<[MessageID, MessageData]>
+  >,
   'get_total_messages' : ActorMethod<[], MessageID>,
   'hasUserRequestedJoin' : ActorMethod<[UserID], boolean>,
   'is_user_added' : ActorMethod<[UserID], boolean>,

@@ -37,6 +37,10 @@ export interface ChatCore {
   'getUserID' : ActorMethod<[], Principal>,
   'getUsername' : ActorMethod<[UserID__1], Username__1>,
   'getUsersActivity' : ActorMethod<[UserID__1], string>,
+  'getUsersAvatar' : ActorMethod<
+    [Array<UserID__1>],
+    Array<[UserID__1, string]>
+  >,
   'get_user' : ActorMethod<[UserID__1], [] | [UserData]>,
   'get_user_groups' : ActorMethod<[], Array<GroupData>>,
   'hasUserRequestedJoin' : ActorMethod<[GroupID__1], boolean>,

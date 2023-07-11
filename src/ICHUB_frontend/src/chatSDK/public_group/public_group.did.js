@@ -50,6 +50,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(MessageID, MessageData))],
         ['query'],
       ),
+    'get_messages_paginated' : IDL.Func(
+        [IDL.Nat, IDL.Nat],
+        [IDL.Vec(IDL.Tuple(MessageID, MessageData))],
+        ['query'],
+      ),
     'get_total_messages' : IDL.Func([], [MessageID], ['query']),
     'hasUserRequestedJoin' : IDL.Func([UserID], [IDL.Bool], ['query']),
     'is_user_added' : IDL.Func([UserID], [IDL.Bool], ['query']),

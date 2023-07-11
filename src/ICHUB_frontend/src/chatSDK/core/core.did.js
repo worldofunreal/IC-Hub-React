@@ -118,6 +118,11 @@ export const idlFactory = ({ IDL }) => {
     'getUserID' : IDL.Func([], [IDL.Principal], []),
     'getUsername' : IDL.Func([UserID__1], [Username__1], ['query']),
     'getUsersActivity' : IDL.Func([UserID__1], [IDL.Text], ['query']),
+    'getUsersAvatar' : IDL.Func(
+        [IDL.Vec(UserID__1)],
+        [IDL.Vec(IDL.Tuple(UserID__1, IDL.Text))],
+        ['query'],
+      ),
     'get_user' : IDL.Func([UserID__1], [IDL.Opt(UserData)], ['query']),
     'get_user_groups' : IDL.Func([], [IDL.Vec(GroupData)], ['query']),
     'hasUserRequestedJoin' : IDL.Func([GroupID__1], [IDL.Bool], ['query']),

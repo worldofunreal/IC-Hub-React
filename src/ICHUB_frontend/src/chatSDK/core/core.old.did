@@ -79,7 +79,7 @@ service : {
   getMyFriendRequests: () -> (vec UserFriendData) query;
   getMyFriends: () -> (vec UserFriendData) query;
   getPrivateChat: (UserID__1) -> (nat, bool) query;
-  getUserAvatar: (UserID__1) -> (text);
+  getUserAvatar: (UserID__1) -> (text) query;
   getUserGroupsAdmin: (UserID__1) -> (opt UserGroups) query;
   getUserID: () -> (principal);
   getUsername: (UserID__1) -> (Username__1) query;

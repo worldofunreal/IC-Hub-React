@@ -8,7 +8,14 @@ type RequestJoinData =
   {dateRequested : Nat64; seenByAdmin : Bool; userID : UserID};
 type RequestJoinData__1 = RequestJoinData;
 type UserData =
-  {banned : Bool; userID : UserID; userSince : Nat64; username : Username};
+  {
+    avatar : Text;
+    banned : Bool;
+    description : Text;
+    userID : UserID;
+    userSince : Nat64;
+    username : Username
+  };
 type UserData__1 = UserData;
 type UserID = Principal;
 type UserID__1 = UserID;

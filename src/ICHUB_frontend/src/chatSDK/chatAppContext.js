@@ -503,6 +503,17 @@ const ChatICAppProvider = ({ children }) => {
       let _msgUnity = [];
       if(_chatText !== null){
         _chatText.sort((a, b) => { return (parseInt(a[0]) - parseInt(b[0])) });
+        let _users = [];
+        let _avatars = [];
+        for(let i = 0; i < _chatText.length; i++){
+          if(!_users.includes(_chatText[i][1].userID)){
+            _users.push(_chatText[i][1].userID);
+          }
+        }
+        if(_users.length > 0){
+          _avatars = await chatCoreCanister.getUsersAvatar(_users);
+          console.log("AVATARS", _avatars);
+        }
         for(let i = 0; i < _chatText.length; i++){
           let _dateUnix = parseInt(Math.floor(parseFloat(_chatText[i][1].time) / 1000000));
           let _date = new Date(_dateUnix);
@@ -513,7 +524,7 @@ const ChatICAppProvider = ({ children }) => {
             text        : _chatText[i][1].text,
             username    : _chatText[i][1].username.split("#")[0],
             timeStamp   : _formatDate,
-            avatarUser  : "https://cdn3.iconfinder.com/data/icons/delivery-and-logistics/24/logistics-25-512.png",
+            avatarUser  : getAvatar(_chatText[i][1].userID.toString(), _avatars),
           };
           _msgUnity.push(_msg);
         }
@@ -527,6 +538,7 @@ const ChatICAppProvider = ({ children }) => {
       let nameGroup = (chatSelected.isDirect === true) ? (chatSelected.name.split(" ")[0] === username) ? chatSelected.name.split(" ")[1] : chatSelected.name.split(" ")[0] : chatSelected.name;
       _msgUnity = "{\"data\":" + JSON.stringify(_msgUnity) + ", \"nameGroup\":\"" + nameGroup + "\", \"avatarGroup\":\"" + /*nameGroup.split(" ").map((n)=>n[0]).join("")*/ chatSelected.avatar + "\", \"idGroup\":" + parseInt(chatSelected.groupID) + ", \"role\":" + _userRole + "}";
       if(unityApp !== null){
+        console.log("Chat_Section", "GetChatMessages", _msgUnity);
         unityApp.send("Chat_Section", "GetChatMessages", _msgUnity);
       }
       setTimeout(() => {
@@ -534,6 +546,16 @@ const ChatICAppProvider = ({ children }) => {
       }, 5000);
     }
   };
+
+  const getAvatar = (id, list) => {
+    console.log(id, list);
+    for(let i = 0; i < list.length; i++){
+      if(list[i][0].toString() === id && list[i][1] !== ""){
+        return list[i][1];
+      }
+    }
+    return "https://cdn3.iconfinder.com/data/icons/delivery-and-logistics/24/logistics-25-512.png";
+  }
 
   const updateMessages = (_counter) => {
     renderChatMessages(_counter);
@@ -820,7 +842,7 @@ const ChatICAppProvider = ({ children }) => {
     let _data = JSON.stringify({
         username    : username,
         userState   : _status,
-        principalID : getAccountId(userPrincipal, null), //userPrincipal.toString(),
+        principalID : userPrincipal.toString(), //getAccountId(userPrincipal, null),
         avatar      : _avatar,
     });
     if(unityApp !== null){

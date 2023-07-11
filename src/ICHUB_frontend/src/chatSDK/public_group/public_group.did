@@ -54,6 +54,11 @@ type ChatGroups =
                               MessageID;
                               MessageData;
                             }) query;
+   get_messages_paginated: (nat, nat) ->
+    (vec record {
+           MessageID;
+           MessageData;
+         }) query;
    get_total_messages: () -> (MessageID) query;
    hasUserRequestedJoin: (UserID) -> (bool) query;
    is_user_added: (UserID) -> (bool) query;

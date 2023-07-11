@@ -7,9 +7,6 @@
  * 
  * REVISAR LEAK DE MEMORIA RAM Y EXCESO DE USO DE CPU
  * 
- * HACER QUERY DESDE FRONTEND LA RECUPERACIÓN DE BALANCE DE ICP
- * HACER QUE SE EMPIECE A RECUPERAR LA INFO DEL USUARIO INCLUSO ANTES DE ONHUBSCENE
- * 
  * 
  */
 
@@ -21,7 +18,6 @@
 *
 * NECESITO HACER QUE EL ENVIO DE ICP SEA TANTO A PRINCIPAL COMO ADDRESS
 * HACER PRUEBAS DE ENVIO DE ICP
-* PEGAR EN LOS INPUTS
 *
 *
 *
@@ -36,7 +32,7 @@ import Unity, { UnityContext } from "react-unity-webgl";
 import { Principal } from '@dfinity/principal';
 import { loginII, handleAuthenticated, loginStoic, loginPlug, loginInfinityWallet, setCanisterData } from './functions/login';
 import { idlFactory as backendIDL } from '../../declarations/ICHUB_backend';
-import { fromHexString, toHexString } from "./functions/account";
+import { fromHexString, toHexString, getAccountId } from "./functions/account";
 import { AppContext } from './context';
 import { ChatAppContext } from './chatSDK/chatAppContext';
 import { Usergeek } from "usergeek-ic-js";
@@ -138,7 +134,6 @@ export default function App(props){
     /// AUTO LOGIN
     useEffect(() => {
         if(isLoaded === true){
-            console.log("SESSION", saveSession, walletService);
             if(saveSession === null && walletService === null){
                 let _prevSave = localStorage.getItem("ichub");
                 if(_prevSave !== null && _prevSave !== undefined){
@@ -274,7 +269,6 @@ export default function App(props){
         const getUserAccID = async () => {
             try{
                 let _accID  = await canister.mySubaccount();
-                console.log("mySubaccount", _accID, toHexString(_accID));
                 setUserAccountID(_accID);
             } catch(err){
                 console.log("ERR mySubaccount", err);
@@ -373,31 +367,27 @@ export default function App(props){
 
     ///////// ICP //////////
     const getICPBalance = async () => {
+        console.clear();
         if(userPrincipal !== undefined){
-            console.log("BEFORE CANISTER", new Date());
             let _icp = await canister.getICPBalance();
-            console.log("AFTER CANISTER", new Date());
-            console.log("USER PRINCIPAL");
-            console.log(userPrincipal);
-            try{
-                const ledger = LedgerCanister.create();
-                const accID  = await canister.mySubaccount();
-                console.log("accID", accID);
+            // try{
+            //     const ledger = LedgerCanister.create();
+            //     const _accID = AccountIdentifier.fromHex(getAccountId(userPrincipal, null));
 
-                // let _p = Principal.fromText(userPrincipal.toString());//.toUint8Array();
-                // console.log("_p", _p);
-                // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
-                // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
-                // console.log("WILL GET NEW ICP", accountIdentifier, "-");
-                // /*const accountIdentifier = AccountIdentifier.fromHex(
-                //     "acedcf79daec4cb86dd7b44c53dd5111a81a006d26a63b8dd5e822b6fd711ad5"
-                // );*/
-                const _newICP = await ledger.accountBalance( { accID } );
-                // //const _newICP = await ledger.accountBalance( AccountIdentifier.fromPrincipal({principal: userPrincipal, subAccount: null}) , false);
-                console.log("NEW ICP", _newICP);
-            }catch(err){
-                console.log("ERR ", err);
-            }
+            //     // let _p = Principal.fromText(userPrincipal.toString());//.toUint8Array();
+            //     // console.log("_p", _p);
+            //     // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
+            //     // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
+            //     // console.log("WILL GET NEW ICP", accountIdentifier, "-");
+            //     // /*const accountIdentifier = AccountIdentifier.fromHex(
+            //     //     "acedcf79daec4cb86dd7b44c53dd5111a81a006d26a63b8dd5e822b6fd711ad5"
+            //     // );*/
+            //     const _newICP = await ledger.accountBalance( _accID );
+            //     // //const _newICP = await ledger.accountBalance( AccountIdentifier.fromPrincipal({principal: userPrincipal, subAccount: null}) , false);
+            //     console.log("NEW ICP", _newICP);
+            // }catch(err){
+            //     console.log("ERR ", err);
+            // }
             let icp_dec = parseFloat(parseInt(_icp.e8s)) / 100000000;
             let _tokens = JSON.stringify({
                 data : [{
@@ -407,7 +397,6 @@ export default function App(props){
                     id     : 1,
                 }]
             });
-            console.log('("Hub_Panel", "GetTokensInfo"', _tokens);
             unityContext.send("Hub_Panel", "GetTokensInfo", _tokens);
         }
         setTimeout(() => {
@@ -416,18 +405,44 @@ export default function App(props){
     };
 
     const sendICP = async (amount, to) => {
+        console.clear();
         if(amount > 0){
-            let _amount = amount * 1000000;
-            console.log("SEND ICP", _amount, to);
+            let _to, _accID, _isPrincipal;
+            let _amount = amount * 100000000;
+            _amount = parseInt(_amount) + 10000;
             try{
-                let _sent = await canister.sendICP(_amount, to);
-                console.log("SENT ICP", _sent);
+                _to = Principal.fromText(to);
+                _isPrincipal = true;
+            } catch(err){
+                console.log("Not a principal");
+            }
+            if(_isPrincipal === true){
+                _accID = fromHexString(getAccountId(_to, null));
+                try{
+                    let _sent = await canister.sendICP(_amount, _accID);
+                    if(_sent[0] === true){
+                        openSuccessPanel();
+                    }
+                } catch(err){
+                    console.log("ERROR WHILE SENDING ICP", err);
+                    alert("ERROR WHILE SENDING ICP, PLEASE CHECK THE ADDRESS AND AMOUNT AND TRY AGAIN");
+                }
+            } else {
+                _to = to;
+            }
+            _accID = fromHexString(to);
+            try{
+                let _sent = await canister.sendICP(_amount, _accID);
+                if(_sent[0] === true){
+                    openSuccessPanel();
+                }
             } catch(err){
                 console.log("ERROR WHILE SENDING ICP", err);
                 alert("ERROR WHILE SENDING ICP, PLEASE CHECK THE ADDRESS AND AMOUNT AND TRY AGAIN");
             }
         } else {
-            console.log("INVALID ICP AMOUNT");
+            console.log("INVALID AMOUNT");
+            alert("INVALID AMOUNT");
         }
     }
 
@@ -740,7 +755,7 @@ export default function App(props){
             <Unity
                 unityContext = { unityContext }
                 style = {{
-                    height: "100vh",
+                    height: "95vh",
                     width: "100vw",
                 }} 
             />

@@ -38,8 +38,10 @@ type ICHub =
    getICPBalance: () -> (record {e8s: nat64;});
    getUserAvatar: () -> (text, AvatarType) query;
    getUserData: () -> (opt UserData) query;
+   mySubaccount: () -> (AccountIdentifier) query;
    sendICP: (nat64, AccountIdentifier) -> (bool, text, opt TransferResult);
    setImageToUser: (text, AvatarType) -> (bool);
+   userSubaccount: (principal) -> (AccountIdentifier) query;
  };
 type BlockIndex = nat64;
 type AvatarType__1 = 

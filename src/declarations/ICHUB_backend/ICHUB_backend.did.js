@@ -50,12 +50,18 @@ export const idlFactory = ({ IDL }) => {
     'getICPBalance' : IDL.Func([], [IDL.Record({ 'e8s' : IDL.Nat64 })], []),
     'getUserAvatar' : IDL.Func([], [IDL.Text, AvatarType], ['query']),
     'getUserData' : IDL.Func([], [IDL.Opt(UserData)], ['query']),
+    'mySubaccount' : IDL.Func([], [AccountIdentifier], ['query']),
     'sendICP' : IDL.Func(
         [IDL.Nat64, AccountIdentifier],
         [IDL.Bool, IDL.Text, IDL.Opt(TransferResult)],
         [],
       ),
     'setImageToUser' : IDL.Func([IDL.Text, AvatarType], [IDL.Bool], []),
+    'userSubaccount' : IDL.Func(
+        [IDL.Principal],
+        [AccountIdentifier],
+        ['query'],
+      ),
   });
   return ICHub;
 };

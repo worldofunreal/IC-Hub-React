@@ -306,7 +306,6 @@ const ChatICAppProvider = ({ children }) => {
   const renderGroupsList = async () => {
     /// Once we have all user's groups we can display them
     let _userGroups = userGroups;
-    console.log("userGroups1", userGroups);
     if(_userGroups !== null && _userGroups !== undefined){
       /// First we sort them by ID asc
       _userGroups.sort((a, b) => { return (parseInt(a.groupID) - parseInt(b.groupID)) });
@@ -432,9 +431,13 @@ const ChatICAppProvider = ({ children }) => {
       };
       data = JSON.stringify(data);
       if(unityApp !== null){
-        console.log("GetInfoPanelSettings", data);
         unityApp.send("SettingGroup Panel", "GetInfoPanelSettings", data);
       }
+    }
+    try{
+      /// ADD: CLOSE LOADING CHAT ANIMATION ON UNITY
+    } catch(err){
+      /// Probably Unity wasn't ready for this call
     }
   };
 
@@ -538,7 +541,6 @@ const ChatICAppProvider = ({ children }) => {
 
   const getUserGroups = async () => {
     let _userGroups = await chatCoreCanister.get_user_groups();
-    console.log("USER GROUPS", _userGroups);
     if(_userGroups !== null && _userGroups.length > 0){
       setUserGroups(_userGroups);
       if(_loadingGroups === false){
@@ -718,22 +720,27 @@ const ChatICAppProvider = ({ children }) => {
 
     /// FRIENDS
     const getUserFriends = async () => {
-      let _userFriends = await chatCoreCanister.getMyFriends();
-      let userFriends = [];
-      for(let i = 0; i < _userFriends.length; i++){
-        let _friendUsername = _userFriends[i].username.split("#");
-        _friendUsername = _friendUsername[0];
-        let _uf = {
-          avatar      : _userFriends[i].avatar,
-          name        : _friendUsername,
-          status      : getUnityStatusEquivalent(_userFriends[i].status),
-          principalID : _userFriends[i].userID.toString(),
-        };
-        userFriends.push(_uf);
-      }
-      if(unityApp !== null){
-        console.log('"Hub_Panel", "GetFriendsInfo"', "{\"data\":" + JSON.stringify(userFriends) + "}");
-        unityApp.send("Hub_Panel", "GetFriendsInfo", "{\"data\":" + JSON.stringify(userFriends) + "}");
+      if(chatCoreCanister !== null){
+        let _userFriends = await chatCoreCanister.getMyFriends();
+        let userFriends = [];
+        for(let i = 0; i < _userFriends.length; i++){
+          let _friendUsername = _userFriends[i].username.split("#");
+          _friendUsername = _friendUsername[0];
+          let _uf = {
+            avatar      : _userFriends[i].avatar,
+            name        : _friendUsername,
+            status      : getUnityStatusEquivalent(_userFriends[i].status),
+            principalID : _userFriends[i].userID.toString(),
+          };
+          userFriends.push(_uf);
+        }
+        if(unityApp !== null){
+          unityApp.send("Hub_Panel", "GetFriendsInfo", "{\"data\":" + JSON.stringify(userFriends) + "}");
+        }
+      } else {
+        setTimeout(() => {
+          getUserFriends()
+        }, 1000);
       }
     };
 
@@ -756,12 +763,11 @@ const ChatICAppProvider = ({ children }) => {
         notifications : []
       });
       if(unityApp !== null){
-        console.log("CanvasNotificationRequests", "GetInfoNotificationPanel", _upf);
         unityApp.send("CanvasNotificationRequests", "GetInfoNotificationPanel", _upf);
       }
       setTimeout(() => {
         getUserPendingNotifications();
-      }, 15000);
+      }, 20000);
     };
 
     const acceptFriendRequest = async (user2) => {
@@ -810,24 +816,19 @@ const ChatICAppProvider = ({ children }) => {
   const setUserdataHub = async () => {
     let _avatar = await chatCoreCanister.getUserAvatar(userPrincipal);
     let _status = await chatCoreCanister.getUsersActivity(userPrincipal);
-    console.log("USER STATUS ON CANISTER", _status);
     _status = (_status.length > 0 && _status[0] !== "") ? getUnityStatusEquivalent(_status) : "Avaliable";
-    console.log("TO UNITY", _status);
     let _data = JSON.stringify({
         username    : username,
         userState   : _status,
-        principalID : userPrincipal.toString(),
+        principalID : getAccountId(userPrincipal, null), //userPrincipal.toString(),
         avatar      : _avatar,
     });
-    //console.log("_data", _data);
     if(unityApp !== null){
       unityApp.send("Hub_Panel", "GetUserInfo", _data);
-      console.log('"Hub_Panel", "GetUserInfo"', _data);
     }
   };
 
   const getUnityStatusEquivalent = (_id) => {
-    console.log("TO UPPER CASE", _id.toUpperCase());
     switch(_id.toUpperCase()){
       case "AVALIABLE"       : return 0;
       case "DO NOT DISTURBE" : return 1;
@@ -849,7 +850,6 @@ const ChatICAppProvider = ({ children }) => {
 
   const logUserActivity = async (_data) => {
     let _saveActivity = await chatCoreCanister.logUserActivity(getActivityEquivalent(_data), true);
-    console.log("SAVE USER ACTIVITY STATUS", getActivityEquivalent(_data), _saveActivity);
     if(_saveActivity[0] === true){
       setUserdataHub();
       openSuccessPanel();
@@ -861,7 +861,6 @@ const ChatICAppProvider = ({ children }) => {
       //unityApp.send("Canvas", "OnAvatarReady", "");
     }
     let _img = await chatCoreCanister.setImageToUser(img);
-    console.log("Img saved", img, _img);
     return _img;
   };
 
@@ -969,7 +968,6 @@ const ChatICAppProvider = ({ children }) => {
   const sendProjectsData = async () => {
     let _projects = await projectsCanister.getAllProjects();
     let _favs     = await chatCoreCanister.getMyFavorites();
-    console.log("p,f", _projects, _favs);
     let _allProjects = [];
     for(let i = 0; i < _projects.length; i++){
       let u = _projects[i].user;
@@ -1019,7 +1017,6 @@ const ChatICAppProvider = ({ children }) => {
     };
     _data = JSON.stringify(_data);
     if(unityApp !== null){
-      //console.log('"AppBrowser_Section","GetAppsInfo"', _data);
       unityApp.send("AppBrowser_Section","GetAppsInfo", _data);
     }
   };
@@ -1172,10 +1169,8 @@ const ChatICAppProvider = ({ children }) => {
       notify     : false,
       subaccount : [],
     };
-    console.log(_transferRequest);
     try{
       let _transfer = await _can.transfer(_transferRequest);
-      console.log("TRANSFER", _transfer);
       getTokens();
       openSuccessPanel();
     }catch(err){

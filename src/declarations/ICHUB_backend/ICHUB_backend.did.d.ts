@@ -18,11 +18,13 @@ export interface ICHub {
   'getICPBalance' : ActorMethod<[], { 'e8s' : bigint }>,
   'getUserAvatar' : ActorMethod<[], [string, AvatarType]>,
   'getUserData' : ActorMethod<[], [] | [UserData]>,
+  'mySubaccount' : ActorMethod<[], AccountIdentifier>,
   'sendICP' : ActorMethod<
     [bigint, AccountIdentifier],
     [boolean, string, [] | [TransferResult]]
   >,
   'setImageToUser' : ActorMethod<[string, AvatarType], boolean>,
+  'userSubaccount' : ActorMethod<[Principal], AccountIdentifier>,
 }
 export interface ICP { 'e8s' : bigint }
 export type TransferError = {

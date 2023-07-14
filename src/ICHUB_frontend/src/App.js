@@ -84,7 +84,7 @@ export default function App(props){
             getUserPendingNotifications, setUserdataHub, acceptFriendRequest, rejectFriendRequest, messageUser, 
             requestFriendship, logUserActivity, searchUsers, changeUserDescription, setImageToUser, checkUserActivity,
             getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, setCurrentSection, nftList, addNFTCollection,
-            transferNft, addReport, openSuccessPanel, userAccountID, setUserAccountID
+            transferNft, addReport, openSuccessPanel, userAccountID, setUserAccountID, getProjectsCanister, projectsCanister
         } = useContext(ChatAppContext);
     /// Local variables
     const [usergeekInitialized, setUsergeekInitialized] = useState(false);
@@ -256,6 +256,10 @@ export default function App(props){
         };
 
         unityContext.on("OnHubScene", () => {
+            getProjectsCanister();
+        });
+
+        const initAllHUBData = async() => {
             prepHUB();
             getUserAccID();
             getICPBalance();
@@ -264,7 +268,13 @@ export default function App(props){
             getUserPendingNotifications();
             setUserdataHub();
             checkUserActivity();
-        });
+        }
+
+        useEffect(() => {
+            if(projectsCanister !== null){
+                initAllHUBData();
+            }
+        }, [projectsCanister]);
 
         const getUserAccID = async () => {
             try{
@@ -615,6 +625,12 @@ export default function App(props){
         window.location.reload();
     });
 
+    unityContext.on("SetAvatarToGroup", () => {
+        console.log("OPEN SetAvatarToGroup");
+        setImageLoadingSection("SetAvatarToGroup");
+        openUploadImageProfile();
+    });
+
     /// Tokens
     unityContext.on("SendCrypto", (json) => {
         console.log("DATA NFT SEND", json);
@@ -654,7 +670,7 @@ export default function App(props){
             case "SetAvatarImage":
                 unityContext.send("Canvas", "OnAvatarUploadLoading", "");
                 break;
-            case "SetAvatarImageFromProfile":
+            case "SetAvatarImageFromProfile": case "SetAvatarToGroup":
                 unityContext.send("CanvasPlayerProfile", "OnAvatarUploadLoading", "");
                 break;
         }
@@ -678,6 +694,9 @@ export default function App(props){
                 let _uImg = await canister.setImageToUser(urlImage, { "url": null });
                 await setImageToUser(urlImage);
                 unityContext.send("Canvas", "OnAvatarUploadReady", urlImage);
+                break;
+            case "SetAvatarToGroup":
+                unityContext.send("CanvasPlayerProfile", "OnAvatarUploadReady", urlImage);
                 break;
             case "SetAvatarImageFromProfile":
                 let _newI = await setImageToUser(urlImage);

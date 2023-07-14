@@ -137,7 +137,6 @@ const ChatICAppProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    //// Delete?
     if(projectsCanister !== null){
       sendProjectsData();
     }
@@ -262,7 +261,6 @@ const ChatICAppProvider = ({ children }) => {
       loginUser();
       getUsersExtTokens();
       getImagesCanister();
-      getProjectsCanister();
       setCurrentSection(4);
     }
   }, [userPrincipal, username]);
@@ -822,13 +820,20 @@ const ChatICAppProvider = ({ children }) => {
       if(_privateChat[1] === true){
         if(_privateChat[0] > 0){
           await getUserGroups();
+          if(unityApp !== null){
+            unityApp.send("Chat_Section", "SetGroupSelected", parseInt(_privateChat[0]));
+          }
           selectChat(parseInt(_privateChat[0]));
-          openSuccessPanel();
+          //openSuccessPanel();
         } else {
           let _createPrivateChat = await chatCoreCanister.create_private_chat(Principal.fromText(principal));
           if(_createPrivateChat[2] > 0){
             await getUserGroups();
+            if(unityApp !== null){
+              unityApp.send("Chat_Section", "SetGroupSelected", parseInt(_createPrivateChat[2]));
+            }
             selectChat(parseInt(_createPrivateChat[2]));
+            //openSuccessPanel();
           }
         }
       }
@@ -836,14 +841,24 @@ const ChatICAppProvider = ({ children }) => {
 
   /// USER DATA FOR HUB
   const setUserdataHub = async () => {
-    let _avatar = await chatCoreCanister.getUserAvatar(userPrincipal);
-    let _status = await chatCoreCanister.getUsersActivity(userPrincipal);
+    let _avatar   = await chatCoreCanister.getUserAvatar(userPrincipal);
+    let _status   = await chatCoreCanister.getUsersActivity(userPrincipal);
+    let _hasApp   = 0;
+    if(projectsCanister !== null){
+      try{
+        let _prevData = await projectsCanister.getMyProject();
+        _hasApp = (_prevData !== null && _prevData.length > 0) ? 1 : 0;
+      } catch (err){
+        console.log("ERROR HAS APP", err);
+      }
+    }
     _status = (_status.length > 0 && _status[0] !== "") ? getUnityStatusEquivalent(_status) : "Avaliable";
     let _data = JSON.stringify({
         username    : username,
         userState   : _status,
         principalID : userPrincipal.toString(), //getAccountId(userPrincipal, null),
         avatar      : _avatar,
+        hasApp      : _hasApp
     });
     if(unityApp !== null){
       unityApp.send("Hub_Panel", "GetUserInfo", _data);
@@ -1247,8 +1262,8 @@ const ChatICAppProvider = ({ children }) => {
                   getUserPendingNotifications, acceptFriendRequest, rejectFriendRequest, messageUser, requestFriendship,
                   setUserdataHub, logUserActivity, searchUsers, changeUserDescription, setImageToUser,
                   checkUserActivity, getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, currentSection,
-                  setCurrentSection, nftList, addNFTCollection, transferNft, addReport, openSuccessPanel,
-                  userAccountID, setUserAccountID};
+                  setCurrentSection, nftList, addNFTCollection, transferNft, addReport, openSuccessPanel, 
+                  getProjectsCanister, projectsCanister, userAccountID, setUserAccountID};
 
   return <ChatAppContext.Provider value={value}>{children}</ChatAppContext.Provider>;
 };

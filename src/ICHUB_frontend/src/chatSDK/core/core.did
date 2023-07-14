@@ -62,7 +62,7 @@ type ChatCore =
    changeGroupName: (GroupID__1, text) -> (bool, text);
    changeGroupPrivacy: (GroupID__1, bool) -> (bool, text);
    changeUserDescription: (text) -> (bool);
-   create_group: (text, bool, bool, text) -> (bool, text);
+   create_group: (text, bool, bool, text, text) -> (bool, text);
    create_private_chat: (UserID__1) -> (bool, text, nat);
    create_user_profile: (Username__1, text) -> (bool, text);
    friendRequest: (UserID__1) -> (bool, text);

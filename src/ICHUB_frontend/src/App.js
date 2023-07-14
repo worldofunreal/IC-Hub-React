@@ -377,7 +377,7 @@ export default function App(props){
 
     ///////// ICP //////////
     const getICPBalance = async () => {
-        console.clear();
+        //console.clear();
         if(userPrincipal !== undefined){
             let _icp = await canister.getICPBalance();
             // try{
@@ -670,8 +670,11 @@ export default function App(props){
             case "SetAvatarImage":
                 unityContext.send("Canvas", "OnAvatarUploadLoading", "");
                 break;
-            case "SetAvatarImageFromProfile": case "SetAvatarToGroup":
+            case "SetAvatarImageFromProfile":
                 unityContext.send("CanvasPlayerProfile", "OnAvatarUploadLoading", "");
+                break;
+            case "SetAvatarToGroup":
+                unityContext.send("CreateGroup Panel", "OnAvatarUploadLoading", "");
                 break;
         }
         let _u = await canisterImages.saveImage([...new Uint8Array(await file.arrayBuffer())], file.type);
@@ -696,7 +699,7 @@ export default function App(props){
                 unityContext.send("Canvas", "OnAvatarUploadReady", urlImage);
                 break;
             case "SetAvatarToGroup":
-                unityContext.send("CanvasPlayerProfile", "OnAvatarUploadReady", urlImage);
+                unityContext.send("CreateGroup Panel", "OnAvatarUploadReady", urlImage);
                 break;
             case "SetAvatarImageFromProfile":
                 let _newI = await setImageToUser(urlImage);

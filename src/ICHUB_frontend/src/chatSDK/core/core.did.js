@@ -78,7 +78,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'changeUserDescription' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'create_group' : IDL.Func(
-        [IDL.Text, IDL.Bool, IDL.Bool, IDL.Text],
+        [IDL.Text, IDL.Bool, IDL.Bool, IDL.Text, IDL.Text],
         [IDL.Bool, IDL.Text],
         [],
       ),

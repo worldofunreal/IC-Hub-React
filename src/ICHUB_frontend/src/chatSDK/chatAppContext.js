@@ -510,7 +510,6 @@ const ChatICAppProvider = ({ children }) => {
         }
         if(_users.length > 0){
           _avatars = await chatCoreCanister.getUsersAvatar(_users);
-          console.log("AVATARS", _avatars);
         }
         for(let i = 0; i < _chatText.length; i++){
           let _dateUnix = parseInt(Math.floor(parseFloat(_chatText[i][1].time) / 1000000));
@@ -536,7 +535,6 @@ const ChatICAppProvider = ({ children }) => {
       let nameGroup = (chatSelected.isDirect === true) ? (chatSelected.name.split(" ")[0] === username) ? chatSelected.name.split(" ")[1] : chatSelected.name.split(" ")[0] : chatSelected.name;
       _msgUnity = "{\"data\":" + JSON.stringify(_msgUnity) + ", \"nameGroup\":\"" + nameGroup + "\", \"avatarGroup\":\"" + /*nameGroup.split(" ").map((n)=>n[0]).join("")*/ chatSelected.avatar + "\", \"idGroup\":" + parseInt(chatSelected.groupID) + ", \"role\":" + _userRole + "}";
       if(unityApp !== null){
-        console.log("Chat_Section", "GetChatMessages", _msgUnity);
         unityApp.send("Chat_Section", "GetChatMessages", _msgUnity);
       }
       setTimeout(() => {
@@ -546,7 +544,6 @@ const ChatICAppProvider = ({ children }) => {
   };
 
   const getAvatar = (id, list) => {
-    console.log(id, list);
     for(let i = 0; i < list.length; i++){
       if(list[i][0].toString() === id && list[i][1] !== ""){
         return list[i][1];
@@ -587,9 +584,18 @@ const ChatICAppProvider = ({ children }) => {
 
   const createGroup = async (groupData) => {
     let _isPrivate = (groupData.isPrivate.toUpperCase() === "TRUE") ? true : false;
-    let _group = await chatCoreCanister.create_group(groupData.namegroup, _isPrivate, false, groupData.description);
-    getUserGroups();
-    openSuccessPanel();
+    try{
+      let _group = await chatCoreCanister.create_group(groupData.namegroup, _isPrivate, false, groupData.description, groupData.avatarURL);
+      if(_group[0] === true){
+        getUserGroups();
+        openSuccessPanel();
+      } else {
+        alert("Error while creating group, please contact support with code ALPHA-0564");
+      }
+    } catch(err){
+      alert("Error while creating group, please contact support with code ALPHA-0563");
+      console.log("ERROR CREATING GROUP", err);
+    }
   };
 
   const addUserToGroup = async (json) => {

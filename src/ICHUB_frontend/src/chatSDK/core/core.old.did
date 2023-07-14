@@ -84,6 +84,10 @@ service : {
   getUserID: () -> (principal);
   getUsername: (UserID__1) -> (Username__1) query;
   getUsersActivity: (UserID__1) -> (text) query;
+  getUsersAvatar: (vec UserID__1) -> (vec record {
+                                            UserID__1;
+                                            text;
+                                          }) query;
   get_user: (UserID__1) -> (opt UserData) query;
   get_user_groups: () -> (vec GroupData) query;
   hasUserRequestedJoin: (GroupID__1) -> (bool) query;

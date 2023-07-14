@@ -18,7 +18,7 @@ export interface ChatCore {
   'changeGroupPrivacy' : ActorMethod<[GroupID__1, boolean], [boolean, string]>,
   'changeUserDescription' : ActorMethod<[string], boolean>,
   'create_group' : ActorMethod<
-    [string, boolean, boolean, string],
+    [string, boolean, boolean, string, string],
     [boolean, string]
   >,
   'create_private_chat' : ActorMethod<[UserID__1], [boolean, string, bigint]>,

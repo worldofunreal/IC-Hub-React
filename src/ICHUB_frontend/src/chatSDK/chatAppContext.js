@@ -1329,7 +1329,7 @@ const ChatICAppProvider = ({ children }) => {
   }
 
   const deleteCollection = async (collectionID) => {
-    let _remove = nftsCollCanister.removeCollection(Principal.fromText(collectionID));
+    let _remove = await nftsCollCanister.removeCollection(Principal.fromText(collectionID));
     console.log("removed", _remove);
     if(_remove[0] === true){
       openSuccessPanelAppManagement();

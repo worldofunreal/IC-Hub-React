@@ -73,7 +73,7 @@ export const idlFactory = ({ IDL }) => {
   const Result_1 = IDL.Variant({ 'ok' : Metadata, 'err' : CommonError });
   const MintRequest = IDL.Record({
     'to' : User,
-    'metadata' : IDL.Opt(IDL.Vec(IDL.Nat8)),
+    'metadata' : IDL.Vec(IDL.Nat8),
   });
   const Memo = IDL.Vec(IDL.Nat8);
   const TransferRequest = IDL.Record({
@@ -103,9 +103,19 @@ export const idlFactory = ({ IDL }) => {
     'availableCycles' : IDL.Func([], [IDL.Nat], ['query']),
     'balance' : IDL.Func([BalanceRequest], [BalanceResponse], ['query']),
     'bearer' : IDL.Func([TokenIdentifier__1], [Result_3], ['query']),
+    'computeExtTokenIdentifier' : IDL.Func(
+        [IDL.Principal, IDL.Nat32],
+        [IDL.Text],
+        ['query'],
+      ),
     'distribute' : IDL.Func([User__1], [], []),
     'extensions' : IDL.Func([], [IDL.Vec(Extension)], ['query']),
     'freeGift' : IDL.Func([AccountIdentifier__1], [IDL.Opt(TokenIndex)], []),
+    'getAllTokens' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(TokenIndex, Metadata))],
+        ['query'],
+      ),
     'getAllowances' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(TokenIndex, IDL.Principal))],

@@ -15,6 +15,15 @@ import { computeTokenIdentifier, toHexString } from "../functions/account";
 
 export const ChatAppContext = createContext();
 
+
+//// TODO
+//// ADD PROJECTS' NFTs COLLECTIONS
+//// REPLACE openSuccessPanel WITH openSuccessPanelAppManagement ON EVERY SUCCESS CALL WITH THE APP MANAGEMENT
+//// VERSIONS; NEWS; CREATE/UPDATE APP
+//// DELETE VERSION + DELETE COLLECTION
+//// UPDATE COLLECTION WHEN RECEIVED AGAIN BY THE SAME USER WHO REGISTERED IT
+
+
 /*
 ENUM ROLES BASE
   0 - Owner
@@ -162,6 +171,12 @@ const ChatICAppProvider = ({ children }) => {
   const openSuccessPanel = () => {
     if(unityApp !== null){
       unityApp.send("CanvasPopup", "OpenSuccessPanel", "");
+    };
+  }
+
+  const openSuccessPanelAppManagement = () => {
+    if(unityApp !== null){
+      unityApp.send("AppManagement_Section", "OnSubmitProcessSuccess", "");
     };
   }
 
@@ -953,23 +968,38 @@ const ChatICAppProvider = ({ children }) => {
       currentVersion   : data.AppVersion,
       launchLink       : data.linkDapp
     };
-    //_data = "record " + JSON.stringify(_data);
     if(_prevData !== null && _prevData.length > 0){
-      let _saveData = await projectsCanister.updateProject(parseInt(_prevData[0].id),_data);
+      let _saveData = await projectsCanister.updateProject(parseInt(_prevData[0].id), _data);
       if(_saveData[0] === true){
-        openSuccessPanel();
+        openSuccessPanelAppManagement(); //// THIS MAY CHANGE; CHECK WITH SHIZUKEN
       }
     } else {
       let _createData = await projectsCanister.createProject(_data);
       if(_createData[0] === true){
-        openSuccessPanel();
+        openSuccessPanelAppManagement();
       }
     }
   };
 
   const getUserProjectData = async () => {
     let _prevData = await projectsCanister.getMyProject();
-    if(_prevData !== null && _prevData.length > 0){
+    console.log("USER PROJECT PREV DATA", _prevData);
+    let _collections = [];
+    let _versions    = [];
+    try{
+      _collections = await nftsCollCanister.getMyCollections();
+      console.log("MY COLLECTIONS", _collections);
+    } catch (err){
+      console.log("ERROR GETTING MY COLLECTIONS", err);
+    }
+    try{
+      _versions = await projectsCanister.getMyProjectsVersions();
+      console.log("My versions", _versions);
+    } catch(err){
+      console.log("ERROR GETTING MY VERSIONS", err);
+    }
+    if(_prevData !== undefined && _prevData !== null && _prevData.length > 0){
+      console.log("getUserProjectData", _prevData[0]);
       let _data = {
         name           : _prevData[0].name,
         category       : parseInt(_prevData[0].appCategoryIndex),
@@ -984,8 +1014,41 @@ const ChatICAppProvider = ({ children }) => {
         Banner         : _prevData[0].banner,
         Logo           : _prevData[0].logo,
       }
+      console.log("DATA", _data);
+      let _versionData = [];
+      if(_versions !== undefined && _versions !== null && _versions[0].length > 0){
+        for(let i = 0; i < _versions[0].length; i++){
+          if(parseInt(_versions[0][i].versionID) !== NaN){
+            console.log("READING VERSION", _versions[0][i]);
+            _versionData.push({
+              versionID      : parseInt(_versions[0][i].versionID),
+              projectName    : _versions[0][i].projectName,
+              linkDapp       : _versions[0][i].linkDapp,
+              currentVersion : _versions[0][i].currentVersion,
+              blockChain     : _versions[0][i].blockchain
+            });
+          }
+        }
+      }
+      _versionData = {"versionAppDatas" : _versionData};
+      console.log("VERSIONS", _versionData);
+      let _collectionsD = [];
+      for(let i = 0; i < _collections.length; i++){
+        _collectionsD.push({
+          "collectionName"    : _collections[i][1].name,
+          "canisterID"        : _collections[i][0].toString(),
+          "nftStandard"       : _collections[i][1].standard,
+          "linkToMarketplace" : _collections[i][1].marketplace[0],
+          "avatarUrl"         : _collections[i][1].avatarURL,
+        });
+      }
+      console.log("COLLECTIONS", _collectionsD);
+      let _collectionData = {"collectionAppDatas" : _collectionsD }
+      console.log("AppManagement_Section", "SendDataCollections", JSON.stringify(_collectionData));
       if(unityApp !== null){
-        unityApp.send("AppManagement_Section", "GetInfoApp", JSON.stringify(_data));
+        unityApp.send("AppManagement_Section", "GetInfoApp",         JSON.stringify(_data));
+        unityApp.send("AppManagement_Section", "GetInfoVersions",    JSON.stringify(_versionData));
+        unityApp.send("AppManagement_Section", "GetInfoCollections", JSON.stringify(_collectionData));
       }
     }
   };
@@ -1001,11 +1064,42 @@ const ChatICAppProvider = ({ children }) => {
     };
     let _createNews = await projectsCanister.addNewsToProject(_data);
     if(_createNews[0] === true){
-      openSuccessPanel();
+      openSuccessPanelAppManagement();
     }
     /*
     {"imageNews":"https://avnm2-3aaaa-aaaaj-qacba-cai.raw.ic0.app/img=2295293381","titleNews":"News","contentNews":"This is the news","textButtonNews":"Let's go!","linkButtonNews":"link.com"}
     */
+  };
+
+  const saveAppVersions = async (_data) => {
+    if(_data.versionAppDatas !== undefined && _data.versionAppDatas !== null && _data.versionAppDatas.length > 0){
+      let _versions = [];
+      for(let i = 0; i < _data.versionAppDatas.length; i++){
+        let _d = _data.versionAppDatas[i];
+        console.log(_d);
+        _versions.push({
+          versionID      : i,
+          projectName    : _d.projectName,
+          linkDapp       : _d.linkDapp,
+          currentVersion : _d.currentVersion,
+          blockchain     : _d.blockChain,
+        });
+      }
+      let _saveVersions = await projectsCanister.saveProjectVersions(_versions);
+      console.log("VERSIONS SAVED", _saveVersions);
+      if(_saveVersions[0] === true){
+        openSuccessPanelAppManagement();
+      }
+    }
+  };
+
+  const deleteVersion = async (versionID) => {
+    console.log("TO DO: DELETE VERSIONS");
+    let _deleteVersion = await projectsCanister.deleteVersion(versionID);
+    console.log("VERSION DELETED", _deleteVersion);
+    if(_deleteVersion[0] === true){
+      openSuccessPanelAppManagement();
+    }
   };
 
   const sendProjectsData = async () => {
@@ -1019,18 +1113,16 @@ const ChatICAppProvider = ({ children }) => {
       let _n = [];
       if(n !== undefined && n.length > 0){
         for(let j = 0; j < n.length; j++){
-          let _linkButton = (n[j].linkButton.split("https://").length > 0) ? n[j].linkButton : "https://" + n[j].linkButton;
           _n.push({
             "imageNews": n[j].imageNews,
             "title": n[j].title,
             "content": n[j].content,
-            "linkButton": _linkButton,
+            "linkButton": getLinkHttps(n[j].linkButton),
             "textButton": n[j].textButton
           });
         }
       }
       let _fav = getIsFavorite(u, _favs);
-      let _launchLink = (p.launchLink.split("https://").length > 1) ? p.launchLink : "https://" + p.launchLink;
       let _p = {
         "id": parseInt(p.id),
         "name": p.name,
@@ -1038,17 +1130,17 @@ const ChatICAppProvider = ({ children }) => {
         "logo": p.logo,
         "banner": p.banner,
         "patchNotes": p.patchNotes,
-        "dscvrPortal": p.dscvrPortal,
+        "dscvrPortal": getLinkHttps(p.dscvrPortal),
         "marketPlaces": "",
         "blockchain": p.blockchain,
-        "distrikt": p.distrikt,
-        "openChat": p.openChat,
-        "catalyze": p.catalyze,
-        "twitter" : p.twitter,
+        "distrikt": getLinkHttps(p.distrikt),
+        "openChat": getLinkHttps(p.openChat),
+        "catalyze": getLinkHttps(p.catalyze),
+        "twitter" : getLinkHttps(p.twitter),
         "nftCollections": p.nftCollections.collections,
         "newVersion": p.newVersion,
         "currentVersion": p.currentVersion,
-        "launchLink": _launchLink,
+        "launchLink": getLinkHttps(p.launchLink),
         "listNews": _n,
         "isFavorite" : _fav.isFavorite,
         "favAppOrder" : _fav.favAppOrder
@@ -1063,6 +1155,10 @@ const ChatICAppProvider = ({ children }) => {
       unityApp.send("AppBrowser_Section","GetAppsInfo", _data);
     }
   };
+
+  const getLinkHttps = (link) => {
+    return (link.split("https://").length > 1) ? link : "https://" + link;
+  }
 
   const getIsFavorite = (id, favs) => {
     for(let i = 0; i < favs.length; i++){
@@ -1195,6 +1291,35 @@ const ChatICAppProvider = ({ children }) => {
     return null;
   };
 
+  const saveNFTCollection = async (_data) => {
+    ///{"collectionAppDatas":[{"collectionName":"ICKoalas","canisterID":"tnvo7-iaaaa-aaaah-qcy4q-cai","nftStandard":"EXT","linkToMarketplace":"","avatarUrl":""}]}
+    console.log("COLLECTIONS", _data.collectionAppDatas);
+    for(let i = 0; i < _data.collectionAppDatas.length; i++){
+      let _c = _data.collectionAppDatas[i];
+      let _d = {
+        standard    : _c.nftStandard,
+        canisterID  : Principal.fromText(_c.canisterID),
+        name        : _c.collectionName,
+        marketplace : [_c.linkToMarketplace],
+        addedBy     : userPrincipal,
+        avatarURL   : _c.avatarUrl
+      };
+      let _added = await nftsCollCanister.addNFTCollection(_d);
+      console.log("NFT COLLECTION ADDED", _added);
+    }
+    getUsersExtTokens();
+    //openSuccessPanel();
+    openSuccessPanelAppManagement();
+  };
+
+  const deleteCollection = async (collectionID) => {
+    let _remove = nftsCollCanister.removeCollection(Principal.fromText(collectionID));
+    console.log("removed", _remove);
+    if(_remove[0] === true){
+      openSuccessPanelAppManagement();
+    }
+  };
+
   const transferNft = async (tid, to) => {
     let _can = getCan(tid);
     if(_can === null){
@@ -1269,7 +1394,9 @@ const ChatICAppProvider = ({ children }) => {
                   setUserdataHub, logUserActivity, searchUsers, changeUserDescription, setImageToUser,
                   checkUserActivity, getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, currentSection,
                   setCurrentSection, nftList, addNFTCollection, transferNft, addReport, openSuccessPanel, 
-                  getProjectsCanister, projectsCanister, userAccountID, setUserAccountID};
+                  getProjectsCanister, projectsCanister, userAccountID, setUserAccountID, saveNFTCollection,
+                  walletSelected, setCanisterExternalPlug, setCanisterExternalIW, setCanisterExternal, deleteCollection, 
+                  deleteVersion, saveAppVersions};
 
   return <ChatAppContext.Provider value={value}>{children}</ChatAppContext.Provider>;
 };

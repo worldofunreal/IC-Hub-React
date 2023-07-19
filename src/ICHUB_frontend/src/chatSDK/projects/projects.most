@@ -32,10 +32,20 @@ type ProjectNews =
 type ProjectNews__1 = ProjectNews;
 type UserID = Principal;
 type UserID__1 = UserID;
+type VersionData =
+  {
+    blockchain : Text;
+    currentVersion : Text;
+    linkDapp : Text;
+    projectName : Text;
+    versionID : Nat
+  };
+type VersionData__1 = VersionData;
 actor {
   stable var _projects : [(UserID__1, ProjectData__1)];
   stable var _projectsCollections : [(UserID__1, [Text])];
   stable var _projectsNews : [(UserID__1, [ProjectNews__1])];
+  stable var _projectsVersions : [(UserID__1, [VersionData__1])];
   stable var newsCount : Nat;
   stable var projectsCount : Nat
 };

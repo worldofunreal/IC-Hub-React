@@ -46,10 +46,7 @@ export type Metadata = {
     }
   } |
   { 'nonfungible' : { 'metadata' : [] | [Uint8Array | number[]] } };
-export interface MintRequest {
-  'to' : User,
-  'metadata' : [] | [Uint8Array | number[]],
-}
+export interface MintRequest { 'to' : User, 'metadata' : Uint8Array | number[] }
 export type Result = { 'ok' : Balance__1 } |
   { 'err' : CommonError };
 export type Result_1 = { 'ok' : Metadata } |
@@ -91,9 +88,11 @@ export interface nfts_ichub {
   'availableCycles' : ActorMethod<[], bigint>,
   'balance' : ActorMethod<[BalanceRequest], BalanceResponse>,
   'bearer' : ActorMethod<[TokenIdentifier__1], Result_3>,
+  'computeExtTokenIdentifier' : ActorMethod<[Principal, number], string>,
   'distribute' : ActorMethod<[User__1], undefined>,
   'extensions' : ActorMethod<[], Array<Extension>>,
   'freeGift' : ActorMethod<[AccountIdentifier__1], [] | [TokenIndex]>,
+  'getAllTokens' : ActorMethod<[], Array<[TokenIndex, Metadata]>>,
   'getAllowances' : ActorMethod<[], Array<[TokenIndex, Principal]>>,
   'getBuyers' : ActorMethod<
     [],

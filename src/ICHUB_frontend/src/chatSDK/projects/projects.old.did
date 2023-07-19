@@ -1,3 +1,12 @@
+type VersionData = 
+ record {
+   blockchain: text;
+   currentVersion: text;
+   linkDapp: text;
+   projectName: text;
+   versionID: nat;
+ };
+type UserID = principal;
 type ProjectNews = 
  record {
    content: text;
@@ -11,6 +20,7 @@ type ProjectFullData =
  record {
    data: ProjectData;
    news: opt vec ProjectNews;
+   user: UserID;
  };
 type ProjectData = 
  record {
@@ -38,7 +48,9 @@ service : {
   getAllProjects: () -> (vec ProjectFullData) query;
   getMyProject: () -> (opt ProjectData) query;
   getMyProjectNews: () -> (opt vec ProjectNews) query;
+  getMyProjectsVersions: () -> (opt vec VersionData) query;
   getProjectById: (nat) -> (bool, opt ProjectData) query;
   getProjectNewsById: (nat) -> (opt vec ProjectNews) query;
+  saveProjectVersions: (vec VersionData) -> (bool, text);
   updateProject: (nat, ProjectData) -> (bool, text);
 }

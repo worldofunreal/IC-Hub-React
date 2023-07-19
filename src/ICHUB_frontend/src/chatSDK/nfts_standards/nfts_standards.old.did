@@ -8,8 +8,12 @@ type NFTMetadata =
  };
 service : {
   addNFTCollection: (NFTMetadata) -> (bool, text);
-  getNfts: () -> (vec record {
-                        principal;
-                        NFTMetadata;
-                      }) query;
+  getMyCollections: () -> (vec record {
+                                 principal;
+                                 NFTMetadata;
+                               }) query;
+  getNftsCanisters: () -> (vec record {
+                                 principal;
+                                 NFTMetadata;
+                               }) query;
 }

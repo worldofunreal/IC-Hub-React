@@ -6,9 +6,14 @@ type nfts_ichub =
    availableCycles: () -> (nat) query;
    balance: (BalanceRequest) -> (BalanceResponse) query;
    bearer: (TokenIdentifier__1) -> (Result_3) query;
+   computeExtTokenIdentifier: (principal, nat32) -> (text) query;
    distribute: (User__1) -> ();
    extensions: () -> (vec Extension) query;
    freeGift: (AccountIdentifier__1) -> (opt TokenIndex);
+   getAllTokens: () -> (vec record {
+                              TokenIndex;
+                              Metadata;
+                            }) query;
    getAllowances: () -> (vec record {
                                TokenIndex;
                                principal;
@@ -99,7 +104,7 @@ type Result =
  };
 type MintRequest = 
  record {
-   metadata: opt blob;
+   metadata: blob;
    to: User;
  };
 type Metadata = 

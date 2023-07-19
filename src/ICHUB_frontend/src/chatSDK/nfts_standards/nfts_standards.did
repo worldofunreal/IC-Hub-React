@@ -1,14 +1,20 @@
 type Projects = 
  service {
    addNFTCollection: (NFTMetadata) -> (bool, text);
+   getMyCollections: () -> (vec record {
+                                  principal;
+                                  NFTMetadata;
+                                }) query;
    getNftsCanisters: () -> (vec record {
                                   principal;
                                   NFTMetadata;
                                 }) query;
+   updateAvatarNFTCollection: (principal, text) -> (bool, text);
  };
 type NFTMetadata = 
  record {
    addedBy: principal;
+   avatarURL: text;
    canisterID: principal;
    marketplace: opt text;
    name: text;

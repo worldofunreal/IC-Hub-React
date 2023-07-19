@@ -36,12 +36,22 @@ export interface ProjectNews {
 export interface Projects {
   'addNewsToProject' : ActorMethod<[ProjectNews], [boolean, string]>,
   'createProject' : ActorMethod<[ProjectData], [boolean, string]>,
+  'deleteVersion' : ActorMethod<[bigint], [boolean, string]>,
   'getAllProjects' : ActorMethod<[], Array<ProjectFullData>>,
   'getMyProject' : ActorMethod<[], [] | [ProjectData]>,
   'getMyProjectNews' : ActorMethod<[], [] | [Array<ProjectNews>]>,
+  'getMyProjectsVersions' : ActorMethod<[], [] | [Array<VersionData>]>,
   'getProjectById' : ActorMethod<[bigint], [boolean, [] | [ProjectData]]>,
   'getProjectNewsById' : ActorMethod<[bigint], [] | [Array<ProjectNews>]>,
+  'saveProjectVersions' : ActorMethod<[Array<VersionData>], [boolean, string]>,
   'updateProject' : ActorMethod<[bigint, ProjectData], [boolean, string]>,
 }
 export type UserID = Principal;
+export interface VersionData {
+  'versionID' : bigint,
+  'projectName' : string,
+  'blockchain' : string,
+  'currentVersion' : string,
+  'linkDapp' : string,
+}
 export interface _SERVICE extends Projects {}

@@ -32,14 +32,27 @@ export const idlFactory = ({ IDL }) => {
     'news' : IDL.Opt(IDL.Vec(ProjectNews)),
     'user' : UserID,
   });
+  const VersionData = IDL.Record({
+    'versionID' : IDL.Nat,
+    'projectName' : IDL.Text,
+    'blockchain' : IDL.Text,
+    'currentVersion' : IDL.Text,
+    'linkDapp' : IDL.Text,
+  });
   const Projects = IDL.Service({
     'addNewsToProject' : IDL.Func([ProjectNews], [IDL.Bool, IDL.Text], []),
     'createProject' : IDL.Func([ProjectData], [IDL.Bool, IDL.Text], []),
+    'deleteVersion' : IDL.Func([IDL.Nat], [IDL.Bool, IDL.Text], []),
     'getAllProjects' : IDL.Func([], [IDL.Vec(ProjectFullData)], ['query']),
     'getMyProject' : IDL.Func([], [IDL.Opt(ProjectData)], ['query']),
     'getMyProjectNews' : IDL.Func(
         [],
         [IDL.Opt(IDL.Vec(ProjectNews))],
+        ['query'],
+      ),
+    'getMyProjectsVersions' : IDL.Func(
+        [],
+        [IDL.Opt(IDL.Vec(VersionData))],
         ['query'],
       ),
     'getProjectById' : IDL.Func(
@@ -51,6 +64,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [IDL.Opt(IDL.Vec(ProjectNews))],
         ['query'],
+      ),
+    'saveProjectVersions' : IDL.Func(
+        [IDL.Vec(VersionData)],
+        [IDL.Bool, IDL.Text],
+        [],
       ),
     'updateProject' : IDL.Func(
         [IDL.Nat, ProjectData],

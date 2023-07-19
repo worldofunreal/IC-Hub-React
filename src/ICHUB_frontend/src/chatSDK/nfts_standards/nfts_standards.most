@@ -2,6 +2,7 @@
 type NFTMetadata =
   {
     addedBy : Principal;
+    avatarURL : Text;
     canisterID : Principal;
     marketplace : ?Text;
     name : Text;

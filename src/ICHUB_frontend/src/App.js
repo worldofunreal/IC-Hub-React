@@ -1,32 +1,3 @@
-
-
-
-
-/**
- * 
- * 
- * REVISAR LEAK DE MEMORIA RAM Y EXCESO DE USO DE CPU
- * 
- * 
- */
-
-
-
-/*
-*
-*
-*
-* NECESITO HACER QUE EL ENVIO DE ICP SEA TANTO A PRINCIPAL COMO ADDRESS
-* HACER PRUEBAS DE ENVIO DE ICP
-*
-*
-*
-*/
-
-
-
-
-
 import React, { useEffect, useState, useContext } from 'react';
 import Unity, { UnityContext } from "react-unity-webgl";
 import { Principal } from '@dfinity/principal';
@@ -42,6 +13,7 @@ import { AccountIdentifier, LedgerCanister } from "@dfinity/nns";
 import Lottie from "lottie-react";
 import loadingAnim from "./resources/loading_anim/hubanim.json";
 
+import { idlFactory as mintIDL } from './chatSDK/nfts_ichub';
 
 /// Add Unity build files to the project
 const chunkSize = 2000000;
@@ -84,7 +56,9 @@ export default function App(props){
             getUserPendingNotifications, setUserdataHub, acceptFriendRequest, rejectFriendRequest, messageUser, 
             requestFriendship, logUserActivity, searchUsers, changeUserDescription, setImageToUser, checkUserActivity,
             getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, setCurrentSection, nftList, addNFTCollection,
-            transferNft, addReport, openSuccessPanel, userAccountID, setUserAccountID, getProjectsCanister, projectsCanister
+            transferNft, addReport, openSuccessPanel, userAccountID, setUserAccountID, getProjectsCanister, projectsCanister,
+            saveNFTCollection, walletSelected, setCanisterExternalPlug, setCanisterExternalIW, setCanisterExternal, deleteCollection,
+            deleteVersion, saveAppVersions
         } = useContext(ChatAppContext);
     /// Local variables
     const [usergeekInitialized, setUsergeekInitialized] = useState(false);
@@ -659,6 +633,8 @@ export default function App(props){
     //// Pk#1234 (Plug)  4fec8917ffd42657c22e82a59eb9ae9f48b8503125811059fc5bffd4c72c6d1f
     //// Pk#4321 (Stoic) fbaab62eb1b779036e885fa186b1abcba2e63571cd50de5ebdf209c79cd0113f
 
+    
+
     const readFile = async (files) => {
         let file = files[0];
         window.removeEventListener('focus', handleFocusBack);
@@ -667,6 +643,14 @@ export default function App(props){
             return false;
         }
         switch(imageLoadingSection){
+            case null:
+                break;
+            case "logo":
+                break;
+            case "banner":
+                break;
+            case "imageNews":
+                break;
             case "SetAvatarImage":
                 unityContext.send("Canvas", "OnAvatarUploadLoading", "");
                 break;
@@ -675,6 +659,10 @@ export default function App(props){
                 break;
             case "SetAvatarToGroup":
                 unityContext.send("CreateGroup Panel", "OnAvatarUploadLoading", "");
+                break;
+            default:
+                /// Will receive an object's name to return URL to
+                unityContext.send(imageLoadingSection, "OnAvatarUploadLoading", "");
                 break;
         }
         let _u = await canisterImages.saveImage([...new Uint8Array(await file.arrayBuffer())], file.type);
@@ -708,6 +696,10 @@ export default function App(props){
                     setUserdataHub();
                     getUserDataFromID(userPrincipal.toString());
                 }
+                break;
+            default:
+                /// Will receive an object's name to return URL to
+                unityContext.send(imageLoadingSection, "OnAvatarUploadReady", urlImage);
                 break;
         }
         setImageLoadingSection(null);
@@ -763,6 +755,34 @@ export default function App(props){
         window.removeEventListener('focus', handleFocusBack);
     }
 
+    /// APPS VERSIONS
+    unityContext.on("SendDataVersions", (json) => {
+        console.log("SAVE VERSION", json);
+        saveAppVersions(JSON.parse(json));
+    });
+
+    unityContext.on("DeleteVersion", (versionID) => {
+        console.log("DELETE VERSION", versionID);
+        deleteVersion(versionID);
+    });
+
+    /// NFTs Collections
+    unityContext.on("SetAvatarImageToCollection", (objectName) => {
+        console.log("OBJECT TO RETURN IMAGE TO", objectName);
+        setImageLoadingSection(objectName);
+        openUploadImageProfile();
+    });
+
+    unityContext.on("SendDataCollections", (json) => {
+        console.log("SAVE COLLECTIONS", json);
+        saveNFTCollection(JSON.parse(json));
+    });
+
+    unityContext.on("DeleteCollection", (collectionID) => {
+        console.log("DELETE", collectionID);
+        deleteCollection(collectionID);
+    });
+
     return(
         <>
             {
@@ -785,13 +805,11 @@ export default function App(props){
             <label>{/*balance*/}</label>
             <br />
             <div className='hide'>
-                <input onClick={() => { addCallback(); }} type="file" id="new-file" accept="image/*" onChange={(e)=>{ readFile(e.target.files); }} />
+                <input type="file" id="new-file" accept="image/*" onChange={(e)=>{ readFile(e.target.files); }} />
             </div>
-            {/*<div>
-                <button onClick={() => { addNFTCollection("EXT", "ce2k4-aiaaa-aaaam-qa4ka-cai", "PAW Collection", "https://entrepot.app/marketplace/paw-collection"); }}>ADD PAW COLLECTION COLLECTION</button>
-            </div>*/}
-            {/*<div><button onClick={() => { getTokens() }}>GET TOKENS</button></div>
-            <div>{nftList}</div>*/}
+            {/* <div>
+                <input type="file" id="new-file" accept="image/*" multiple onChange={(e)=>{ uploadNFTfile(e.target.files); }} />
+            </div> */}
         </>
     );
 };

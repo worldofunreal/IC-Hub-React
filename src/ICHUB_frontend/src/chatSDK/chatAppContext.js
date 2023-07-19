@@ -1037,7 +1037,7 @@ const ChatICAppProvider = ({ children }) => {
         _collectionsD.push({
           "collectionName"    : _collections[i][1].name,
           "canisterID"        : _collections[i][0].toString(),
-          "nftStandard"       : _collections[i][1].standard,
+          "nftStandard"       : getStandardEquivalentNum(_collections[i][1].standard),
           "linkToMarketplace" : _collections[i][1].marketplace[0],
           "avatarUrl"         : _collections[i][1].avatarURL,
         });
@@ -1297,7 +1297,7 @@ const ChatICAppProvider = ({ children }) => {
     for(let i = 0; i < _data.collectionAppDatas.length; i++){
       let _c = _data.collectionAppDatas[i];
       let _d = {
-        standard    : _c.nftStandard,
+        standard    : getStandardEquivalentText(_c.nftStandard),
         canisterID  : Principal.fromText(_c.canisterID),
         name        : _c.collectionName,
         marketplace : [_c.linkToMarketplace],
@@ -1311,6 +1311,22 @@ const ChatICAppProvider = ({ children }) => {
     //openSuccessPanel();
     openSuccessPanelAppManagement();
   };
+  
+  /// Receive number from Unity
+  const getStandardEquivalentText = (num) => {
+    switch(num){
+      case 0: case "0": return "EXT";
+      default: return "YOU JUST BROKE IT";
+    }
+  }
+
+  /// Send number to Unity
+  const getStandardEquivalentNum = (txt) => {
+    switch(txt){
+      case "EXT": return 0;
+      default: return "YOU JUST BROKE IT";
+    }
+  }
 
   const deleteCollection = async (collectionID) => {
     let _remove = nftsCollCanister.removeCollection(Principal.fromText(collectionID));

@@ -288,12 +288,13 @@ const ChatICAppProvider = ({ children }) => {
         let _newUser = await chatCoreCanister.create_user_profile(username, "");
       }
       /// Already created, set the data and get the user's groups
-      let _userGroups = await chatCoreCanister.get_user_groups();
+      /*let _userGroups = await chatCoreCanister.get_user_groups();
       if(_userGroups.length > 0) {
         setUserGroups(_userGroups);
         let _publicChat = _userGroups[0];
         setChatSelected(_publicChat);
-      }
+      }*/
+      getUserGroups();
     }
   };
 
@@ -317,6 +318,7 @@ const ChatICAppProvider = ({ children }) => {
   };
 
   const renderGroupsList = async () => {
+    console.log("RENDERING GROUPS");
     /// Once we have all user's groups we can display them
     let _userGroups = userGroups;
     if(_userGroups !== null && _userGroups !== undefined){
@@ -337,6 +339,9 @@ const ChatICAppProvider = ({ children }) => {
         }
       }
       _groupsPanel = "{\"data\":" + JSON.stringify(_groupsPanel) + "}";
+      let _date = new Date();
+      console.log(_date);
+      console.log("Hub_Panel", "GetGroupsInfo", _groupsPanel);
       if(unityApp !== null){
         unityApp.send("Hub_Panel", "GetGroupsInfo", _groupsPanel);
       }
@@ -349,9 +354,9 @@ const ChatICAppProvider = ({ children }) => {
         }catch(err){
           console.log("Error getting role", err);
         }
-        if(_userGroups[i].groupID !== chatSelected.groupID){ /// All but the selected chat
+        if(chatSelected !== null && _userGroups[i].groupID !== chatSelected.groupID){ /// All but the selected chat
           let _group = {
-            id       :   parseInt(_userGroups[i].groupID),
+            id       : parseInt(_userGroups[i].groupID),
             name     : (_userGroups[i].isDirect === true) ? (_userGroups[i].name.split(" ")[0] === username) ? _userGroups[i].name.split(" ")[1].split("#")[0] : _userGroups[i].name.split(" ")[0].split("#")[0] : _userGroups[i].name.split(" ").map((n)=>n[0]).join(""),
             RoleUser : _role,
             avatar   : _userGroups[i].avatar
@@ -574,8 +579,11 @@ const ChatICAppProvider = ({ children }) => {
   const getUserGroups = async () => {
     let _userGroups = await chatCoreCanister.get_user_groups();
     if(_userGroups !== null && _userGroups.length > 0){
+      console.log("_loadingGroups", _loadingGroups);
       setUserGroups(_userGroups);
       if(_loadingGroups === false){
+        let _publicChat = _userGroups[0];
+        setChatSelected(_publicChat);
         _loadingGroups = true;
         loadGroupsUpdated();
       }
@@ -585,14 +593,15 @@ const ChatICAppProvider = ({ children }) => {
   };
 
   const loadGroupsUpdated = async () => {
-    renderGroupsList();
     setTimeout(() => {
-      loadGroupsUpdated();
+      getUserGroups();
     }, 10000);
   };
 
   useEffect(() => {
     if(userGroups !== null && chatSelected !== null){
+      //loadGroupsUpdated();
+      console.log("WILL RENDER GROUPS");
       renderGroupsList();
     }
   }, [userGroups, chatSelected]);

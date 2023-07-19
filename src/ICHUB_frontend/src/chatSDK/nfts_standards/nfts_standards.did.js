@@ -19,6 +19,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Principal, NFTMetadata))],
         ['query'],
       ),
+    'removeCollection' : IDL.Func([IDL.Principal], [IDL.Bool, IDL.Text], []),
     'updateAvatarNFTCollection' : IDL.Func(
         [IDL.Principal, IDL.Text],
         [IDL.Bool, IDL.Text],

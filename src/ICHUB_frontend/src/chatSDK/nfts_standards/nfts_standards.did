@@ -9,6 +9,7 @@ type Projects =
                                   principal;
                                   NFTMetadata;
                                 }) query;
+   removeCollection: (principal) -> (bool, text);
    updateAvatarNFTCollection: (principal, text) -> (bool, text);
  };
 type NFTMetadata = 

@@ -1,6 +1,7 @@
 type NFTMetadata = 
  record {
    addedBy: principal;
+   avatarURL: text;
    canisterID: principal;
    marketplace: opt text;
    name: text;
@@ -16,4 +17,6 @@ service : {
                                  principal;
                                  NFTMetadata;
                                }) query;
+  removeCollection: (principal) -> (bool, text);
+  updateAvatarNFTCollection: (principal, text) -> (bool, text);
 }

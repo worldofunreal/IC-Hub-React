@@ -13,6 +13,7 @@ export interface Projects {
   'addNFTCollection' : ActorMethod<[NFTMetadata], [boolean, string]>,
   'getMyCollections' : ActorMethod<[], Array<[Principal, NFTMetadata]>>,
   'getNftsCanisters' : ActorMethod<[], Array<[Principal, NFTMetadata]>>,
+  'removeCollection' : ActorMethod<[Principal], [boolean, string]>,
   'updateAvatarNFTCollection' : ActorMethod<
     [Principal, string],
     [boolean, string]

@@ -351,11 +351,31 @@ const ChatICAppProvider = ({ children }) => {
           reportError("Error getting role", err);
         }
         if(chatSelected !== null && _userGroups[i].groupID !== chatSelected.groupID){ /// All but the selected chat
+          let _avt = _userGroups[i].avatar;
+          /// GET 1on1 AVATAR
+          if(_userGroups[i].isDirect === true){
+            let _can;
+            switch(walletSelected){
+              case "PlugWallet":
+                _can = await setCanisterExternalPlug(chatCanisterIDL, _userGroups[i].canister);
+                break;
+              case "InfinityWallet":
+                _can = await setCanisterExternalIW(chatCanisterIDL, _userGroups[i].canister);
+                break;
+              case "IdentityWallet":
+                _can = await setCanister(chatCanisterIDL, _userGroups[i].canister);
+                break;
+              case "StoicWallet":
+                _can = await setCanister(chatCanisterIDL, _userGroups[i].canister);
+                break;
+            }
+            _avt = await getAvatarDirectChat(_can);
+          }
           let _group = {
             id       : parseInt(_userGroups[i].groupID),
             name     : (_userGroups[i].isDirect === true) ? (_userGroups[i].name.split(" ")[0].toUpperCase() === username.toUpperCase()) ? _userGroups[i].name.split(" ")[1].split("#")[0] : _userGroups[i].name.split(" ")[0].split("#")[0] : _userGroups[i].name.split(" ").map((n)=>n[0]).join(""),
             RoleUser : _role,
-            avatar   : _userGroups[i].avatar
+            avatar   : _avt
           };
           _groupsUnity.push(_group);
         }
@@ -580,8 +600,8 @@ const ChatICAppProvider = ({ children }) => {
     }
   };
 
-  const getAvatarDirectChat = async () => {
-    let _users = await chatCanister.get_group_users();
+  const getAvatarDirectChat = async (can = chatCanister) => {
+    let _users = await can.get_group_users();
     for(let i = 0; i < _users.length; i++){
       if(_users[i].username.toUpperCase() !== username.toUpperCase()){
         return _users[i].avatar;

@@ -36,26 +36,26 @@ var _lastActivity  = null;
 
 const ChatICAppProvider = ({ children }) => {
   /// Definitions
-  const [unityApp,         setUnityApp]         = useState(null); /// unityApp
-  const [userPrincipal,    setUserPrincipal]    = useState(null); /// User's principal
-  const [userAccountID,    setUserAccountID]    = useState(null);
-  const [username,         setUsername]         = useState(null); /// Username
-  const [identity,         setIdentityChat]     = useState(null); /// An identity of the user logged in
-  const [chatCoreCanister, setChatCoreCanister] = useState(null); /// The canister of the chat
-  const [userGroups,       setUserGroups]       = useState(null); /// The user's groups list
-  const [chatSelected,     setChatSelected]     = useState(null); /// The chat selected
-  const [chatMessages,     setChatMessages]     = useState(null);
-  const [chatCanister,     setChatCanister]     = useState(null); /// The canister of the selected chat
-  const [walletSelected,   setWalletSelected]   = useState(null); /// The wallet service selected by the user to login
-  const [extCanisters,     setExtCanisters]     = useState(null); /// List of tokens on the EXT Standard
-  const [projectsCanister, setProjectsCanister] = useState(null); /// The Canister where the projects are
-  const [canisterImages,   setCanisterImages]   = useState(null); /// The Canister to store and get images
-  const [currentSection,   setCurrentSection]   = useState(null); /// The section of the Hub the user currently is
-  const [nftList,          setNftList]          = useState(null); /// List of NFTs
-  const [nftsCollCanister, setNFTsCollCanister] = useState(null); /// Canister for all the NFTs collections
-  const [allNftsCollData,  setAllNftsCollData]  = useState(null); /// All data from NFTs collections
-  const [userNFTsList,     setUserNFTsList]     = useState(null);
-  const [reportsCanister,  setReportsCanister]  = useState(null);
+  const [unityApp,          setUnityApp]          = useState(null); /// unityApp
+  const [userPrincipal,     setUserPrincipal]     = useState(null); /// User's principal
+  const [userAccountID,     setUserAccountID]     = useState(null);
+  const [username,          setUsername]          = useState(null); /// Username
+  const [identity,          setIdentityChat]      = useState(null); /// An identity of the user logged in
+  const [chatCoreCanister,  setChatCoreCanister]  = useState(null); /// The canister of the chat
+  const [userGroups,        setUserGroups]        = useState(null); /// The user's groups list
+  const [chatSelected,      setChatSelected]      = useState(null); /// The chat selected
+  const [chatMessages,      setChatMessages]      = useState(null);
+  const [chatCanister,      setChatCanister]      = useState(null); /// The canister of the selected chat
+  const [walletSelected,    setWalletSelected]    = useState(null); /// The wallet service selected by the user to login
+  const [extCanisters,      setExtCanisters]      = useState(null); /// List of tokens on the EXT Standard
+  const [projectsCanister,  setProjectsCanister]  = useState(null); /// The Canister where the projects are
+  const [canisterImages,    setCanisterImages]    = useState(null); /// The Canister to store and get images
+  const [currentSection,    setCurrentSection]    = useState(null); /// The section of the Hub the user currently is
+  const [nftList,           setNftList]           = useState(null); /// List of NFTs
+  const [nftsCollCanister,  setNFTsCollCanister]  = useState(null); /// Canister for all the NFTs collections
+  const [allNftsCollData,   setAllNftsCollData]   = useState(null); /// All data from NFTs collections
+  const [userNFTsList,      setUserNFTsList]      = useState(null);
+  const [reportsCanister,   setReportsCanister]   = useState(null);
 
   
   /// The IC's host URL
@@ -318,7 +318,6 @@ const ChatICAppProvider = ({ children }) => {
   };
 
   const renderGroupsList = async () => {
-    console.log("RENDERING GROUPS");
     /// Once we have all user's groups we can display them
     let _userGroups = userGroups;
     if(_userGroups !== null && _userGroups !== undefined){
@@ -339,9 +338,6 @@ const ChatICAppProvider = ({ children }) => {
         }
       }
       _groupsPanel = "{\"data\":" + JSON.stringify(_groupsPanel) + "}";
-      let _date = new Date();
-      console.log(_date);
-      console.log("Hub_Panel", "GetGroupsInfo", _groupsPanel);
       if(unityApp !== null){
         unityApp.send("Hub_Panel", "GetGroupsInfo", _groupsPanel);
       }
@@ -352,12 +348,12 @@ const ChatICAppProvider = ({ children }) => {
           let _roleData = await _tempCan.getUserRole();
           _role = getRoleEnum(_roleData);
         }catch(err){
-          console.log("Error getting role", err);
+          reportError("Error getting role", err);
         }
         if(chatSelected !== null && _userGroups[i].groupID !== chatSelected.groupID){ /// All but the selected chat
           let _group = {
             id       : parseInt(_userGroups[i].groupID),
-            name     : (_userGroups[i].isDirect === true) ? (_userGroups[i].name.split(" ")[0] === username) ? _userGroups[i].name.split(" ")[1].split("#")[0] : _userGroups[i].name.split(" ")[0].split("#")[0] : _userGroups[i].name.split(" ").map((n)=>n[0]).join(""),
+            name     : (_userGroups[i].isDirect === true) ? (_userGroups[i].name.split(" ")[0].toUpperCase() === username.toUpperCase()) ? _userGroups[i].name.split(" ")[1].split("#")[0] : _userGroups[i].name.split(" ")[0].split("#")[0] : _userGroups[i].name.split(" ").map((n)=>n[0]).join(""),
             RoleUser : _role,
             avatar   : _userGroups[i].avatar
           };
@@ -384,7 +380,15 @@ const ChatICAppProvider = ({ children }) => {
 
   const getGroupData = async (idGroup) => {
     if(currentSection === 0){
-      let nameGroup        = (chatSelected.isDirect === true) ? (chatSelected.name.split(" ")[0] === username) ? chatSelected.name.split(" ")[1] : chatSelected.name.split(" ")[0] : chatSelected.name;
+      console.log("CHAT SELECTED");
+      console.log(chatSelected);
+      let nameGroup;
+      if(chatSelected.isDirect === true){
+        let _userOwner     = (chatSelected.name.split(" ")[0].toUpperCase() === username.toUpperCase()) ? 1 : 0;
+        nameGroup          = chatSelected.name.split(" ")[_userOwner];
+      } else {
+        nameGroup          = chatSelected.name;
+      }
       let avatarGroup      = chatSelected.avatar;
       let descriptionGroup = chatSelected.description;
       let _roleuser        = 2;
@@ -394,18 +398,18 @@ const ChatICAppProvider = ({ children }) => {
       try{
         _roleuser = getRoleEnum(await chatCanister.getUserRole());
       }catch(err){
-        console.log("Error getting user role", err);
+        reportError("Error getting user role", err);
       }
       try{
         members = await chatCanister.get_group_users();
       }catch(err){
-        console.log("Error getting members", err);
+        reportError("Error getting members", err);
       }
       if(_roleuser === 0){
         try{
           pending = await chatCanister.getUsersPending();
         }catch(err){
-          console.log("Error getting pending users", err);
+          reportError("Error getting pending users", err);
         }
       }
       let _allMembers = [];
@@ -419,6 +423,9 @@ const ChatICAppProvider = ({ children }) => {
             avatarUser  : members[i].avatar,
           };
           _allMembers.push(_member);
+          if(chatSelected.isDirect === true && nameGroup == members[i].username){
+            avatarGroup = members[i].avatar;
+          }
         }
       }
       //// THIS SHOULD BE IN ANOTHER REQUEST, TO-DO LATER WITH SHIZUKEN
@@ -487,7 +494,7 @@ const ChatICAppProvider = ({ children }) => {
         let _send = await chatCanister.add_text_message(message);
         unityApp.send("Chat_Section", "MessageSent", "");
       } catch(err){
-        console.log("Error sending message", err);
+        reportError("Error sending message", err);
         unityApp.send("Chat_Section", "MessageSent", "");
       }
     }
@@ -517,8 +524,10 @@ const ChatICAppProvider = ({ children }) => {
 
   const renderChatMessages = async (_counter) => {
     if(chatCanister !== null && _counter === _updateCounter){
-      let _chatText = await chatCanister.get_messages();
-      let _msgUnity = [];
+      let avatarGroup;
+      let nameGroup   = chatSelected.name;
+      let _chatText   = await chatCanister.get_messages();
+      let _msgUnity   = [];
       if(_chatText !== null){
         _chatText.sort((a, b) => { return (parseInt(a[0]) - parseInt(b[0])) });
         let _users = [];
@@ -546,14 +555,22 @@ const ChatICAppProvider = ({ children }) => {
           _msgUnity.push(_msg);
         }
       }
+      if(chatSelected.isDirect === true){
+        avatarGroup = await getAvatarDirectChat();
+      }
       let _userRole = 2;
       try{
         _userRole = getRoleEnum(await chatCanister.getUserRole());
       }catch(err){
-        console.log("Error while getting user's role", err);
+        reportError("Error while getting user's role", err);
       }
-      let nameGroup = (chatSelected.isDirect === true) ? (chatSelected.name.split(" ")[0] === username) ? chatSelected.name.split(" ")[1] : chatSelected.name.split(" ")[0] : chatSelected.name;
-      _msgUnity = "{\"data\":" + JSON.stringify(_msgUnity) + ", \"nameGroup\":\"" + nameGroup + "\", \"avatarGroup\":\"" + /*nameGroup.split(" ").map((n)=>n[0]).join("")*/ chatSelected.avatar + "\", \"idGroup\":" + parseInt(chatSelected.groupID) + ", \"role\":" + _userRole + "}";
+      if(chatSelected.isDirect === true){
+        nameGroup = (chatSelected.name.split(" ")[0].toUpperCase() === username.toUpperCase()) ? chatSelected.name.split(" ")[1] : chatSelected.name.split(" ")[0];
+      } else {
+        avatarGroup = chatSelected.avatar;
+      }
+      _msgUnity = "{\"data\":" + JSON.stringify(_msgUnity) + ", \"nameGroup\":\"" + nameGroup + "\", \"avatarGroup\":\"" + avatarGroup + "\", \"idGroup\":" + parseInt(chatSelected.groupID) + ", \"role\":" + _userRole + "}";
+      console.log("_msgUnity", _msgUnity);
       if(unityApp !== null){
         unityApp.send("Chat_Section", "GetChatMessages", _msgUnity);
       }
@@ -561,6 +578,16 @@ const ChatICAppProvider = ({ children }) => {
         updateMessages(_counter);
       }, 5000);
     }
+  };
+
+  const getAvatarDirectChat = async () => {
+    let _users = await chatCanister.get_group_users();
+    for(let i = 0; i < _users.length; i++){
+      if(_users[i].username.toUpperCase() !== username.toUpperCase()){
+        return _users[i].avatar;
+      }
+    }
+    return "";
   };
 
   const getAvatar = (id, list) => {
@@ -579,7 +606,6 @@ const ChatICAppProvider = ({ children }) => {
   const getUserGroups = async () => {
     let _userGroups = await chatCoreCanister.get_user_groups();
     if(_userGroups !== null && _userGroups.length > 0){
-      console.log("_loadingGroups", _loadingGroups);
       setUserGroups(_userGroups);
       if(_loadingGroups === false){
         let _publicChat = _userGroups[0];
@@ -588,7 +614,7 @@ const ChatICAppProvider = ({ children }) => {
         loadGroupsUpdated();
       }
     } else {
-      console.log("USER GROUPS IS NULL");
+      reportError("USER GROUPS IS NULL", null);
     }
   };
 
@@ -600,8 +626,6 @@ const ChatICAppProvider = ({ children }) => {
 
   useEffect(() => {
     if(userGroups !== null && chatSelected !== null){
-      //loadGroupsUpdated();
-      console.log("WILL RENDER GROUPS");
       renderGroupsList();
     }
   }, [userGroups, chatSelected]);
@@ -618,7 +642,7 @@ const ChatICAppProvider = ({ children }) => {
       }
     } catch(err){
       alert("Error while creating group, please contact support with code ALPHA-0563");
-      console.log("ERROR CREATING GROUP", err);
+      reportError("ERROR CREATING GROUP", err);
     }
   };
 
@@ -631,7 +655,7 @@ const ChatICAppProvider = ({ children }) => {
         unityApp.send("Chat_Section", "UserAdded", true);
       }
     } catch(err){
-      console.log("Unable to add user", err);
+      reportError("Unable to add user", err);
       if(unityApp !== null){
         unityApp.send("Chat_Section", "UserAdded", false);
       }
@@ -663,7 +687,7 @@ const ChatICAppProvider = ({ children }) => {
           try{
             _requested = await chatCoreCanister.hasUserRequestedJoin(_g[i].groupID);
           } catch(e){
-            console.log("has requested, error", e);
+            reportError("has requested, error", e);
             _requested = false;
           };
           _r.push({
@@ -758,7 +782,7 @@ const ChatICAppProvider = ({ children }) => {
           unityApp.send("CanvasPlayerProfile", "GetInfoPopupPlayer", _userJson);
         }
       } else {
-        console.log("User may not exist", _user);
+        reportError("User may not exist", _user);
       }
     };
 
@@ -879,7 +903,7 @@ const ChatICAppProvider = ({ children }) => {
         let _prevData = await projectsCanister.getMyProject();
         _hasApp = (_prevData !== null && _prevData.length > 0) ? 1 : 0;
       } catch (err){
-        console.log("ERROR HAS APP", err);
+        reportError("ERROR HAS APP", err);
       }
     }
     _status = (_status.length > 0 && _status[0] !== "") ? getUnityStatusEquivalent(_status) : "Avaliable";
@@ -992,23 +1016,19 @@ const ChatICAppProvider = ({ children }) => {
 
   const getUserProjectData = async () => {
     let _prevData = await projectsCanister.getMyProject();
-    console.log("USER PROJECT PREV DATA", _prevData);
     let _collections = [];
     let _versions    = [];
     try{
       _collections = await nftsCollCanister.getMyCollections();
-      console.log("MY COLLECTIONS", _collections);
     } catch (err){
-      console.log("ERROR GETTING MY COLLECTIONS", err);
+      reportError("ERROR GETTING MY COLLECTIONS", err);
     }
     try{
       _versions = await projectsCanister.getMyProjectsVersions();
-      console.log("My versions", _versions);
     } catch(err){
-      console.log("ERROR GETTING MY VERSIONS", err);
+      reportError("ERROR GETTING MY VERSIONS", err);
     }
     if(_prevData !== undefined && _prevData !== null && _prevData.length > 0){
-      console.log("getUserProjectData", _prevData[0]);
       let _data = {
         name           : _prevData[0].name,
         category       : parseInt(_prevData[0].appCategoryIndex),
@@ -1023,12 +1043,10 @@ const ChatICAppProvider = ({ children }) => {
         Banner         : _prevData[0].banner,
         Logo           : _prevData[0].logo,
       }
-      console.log("DATA", _data);
       let _versionData = [];
       if(_versions !== undefined && _versions !== null && _versions[0].length > 0){
         for(let i = 0; i < _versions[0].length; i++){
           if(parseInt(_versions[0][i].versionID) !== NaN){
-            console.log("READING VERSION", _versions[0][i]);
             _versionData.push({
               versionID      : parseInt(_versions[0][i].versionID),
               projectName    : _versions[0][i].projectName,
@@ -1040,7 +1058,6 @@ const ChatICAppProvider = ({ children }) => {
         }
       }
       _versionData = {"versionAppDatas" : _versionData};
-      console.log("VERSIONS", _versionData);
       let _collectionsD = [];
       for(let i = 0; i < _collections.length; i++){
         _collectionsD.push({
@@ -1051,9 +1068,7 @@ const ChatICAppProvider = ({ children }) => {
           "avatarUrl"         : _collections[i][1].avatarURL,
         });
       }
-      console.log("COLLECTIONS", _collectionsD);
       let _collectionData = {"collectionAppDatas" : _collectionsD }
-      console.log("AppManagement_Section", "SendDataCollections", JSON.stringify(_collectionData));
       if(unityApp !== null){
         unityApp.send("AppManagement_Section", "GetInfoApp",         JSON.stringify(_data));
         unityApp.send("AppManagement_Section", "GetInfoVersions",    JSON.stringify(_versionData));
@@ -1085,7 +1100,6 @@ const ChatICAppProvider = ({ children }) => {
       let _versions = [];
       for(let i = 0; i < _data.versionAppDatas.length; i++){
         let _d = _data.versionAppDatas[i];
-        console.log(_d);
         _versions.push({
           versionID      : i,
           projectName    : _d.projectName,
@@ -1095,7 +1109,6 @@ const ChatICAppProvider = ({ children }) => {
         });
       }
       let _saveVersions = await projectsCanister.saveProjectVersions(_versions);
-      console.log("VERSIONS SAVED", _saveVersions);
       if(_saveVersions[0] === true){
         openSuccessPanelAppManagement();
       }
@@ -1103,9 +1116,7 @@ const ChatICAppProvider = ({ children }) => {
   };
 
   const deleteVersion = async (versionID) => {
-    console.log("TO DO: DELETE VERSIONS");
     let _deleteVersion = await projectsCanister.deleteVersion(versionID);
-    console.log("VERSION DELETED", _deleteVersion);
     if(_deleteVersion[0] === true){
       openSuccessPanelAppManagement();
     }
@@ -1278,7 +1289,7 @@ const ChatICAppProvider = ({ children }) => {
           //setNftList(_userNfts);
           //let _balance = await _can.getUserBalance(userPrincipal);
         }catch(err){
-          console.log("ERROR GETTING BALANCE", err);
+          reportError("ERROR GETTING BALANCE", err);
         }
       }
       setUserNFTsList(_userNFTsList);
@@ -1301,8 +1312,6 @@ const ChatICAppProvider = ({ children }) => {
   };
 
   const saveNFTCollection = async (_data) => {
-    ///{"collectionAppDatas":[{"collectionName":"ICKoalas","canisterID":"tnvo7-iaaaa-aaaah-qcy4q-cai","nftStandard":"EXT","linkToMarketplace":"","avatarUrl":""}]}
-    console.log("COLLECTIONS", _data.collectionAppDatas);
     for(let i = 0; i < _data.collectionAppDatas.length; i++){
       let _c = _data.collectionAppDatas[i];
       let _d = {
@@ -1314,7 +1323,6 @@ const ChatICAppProvider = ({ children }) => {
         avatarURL   : _c.avatarUrl
       };
       let _added = await nftsCollCanister.addNFTCollection(_d);
-      console.log("NFT COLLECTION ADDED", _added);
     }
     getUsersExtTokens();
     //openSuccessPanel();
@@ -1339,7 +1347,6 @@ const ChatICAppProvider = ({ children }) => {
 
   const deleteCollection = async (collectionID) => {
     let _remove = await nftsCollCanister.removeCollection(Principal.fromText(collectionID));
-    console.log("removed", _remove);
     if(_remove[0] === true){
       openSuccessPanelAppManagement();
     }
@@ -1348,7 +1355,6 @@ const ChatICAppProvider = ({ children }) => {
   const transferNft = async (tid, to) => {
     let _can = getCan(tid);
     if(_can === null){
-      console.log("false");
       return false;
     }
     //let memo = "Sent from IC HUB";
@@ -1367,7 +1373,7 @@ const ChatICAppProvider = ({ children }) => {
       getTokens();
       openSuccessPanel();
     }catch(err){
-      console.log("Error while transferring NFT", err);
+      reportError("Error while transferring NFT", err);
     }
   };
 
@@ -1408,6 +1414,10 @@ const ChatICAppProvider = ({ children }) => {
     if(newReport === true){
       openSuccessPanel();
     }
+  }
+
+  const reportError = (text, err) => {
+    console.log(text, err);
   }
 
 

@@ -10,6 +10,7 @@ import { idlFactory as standardsIDL    } from "./nfts_standards";
 import { idlFactory as reportsIDL      } from "./reports";
 //import { idlFactory as idlExt } from "../../../declarations/ext_token/score_token.did";
 import { getAccountId } from "../functions/account";
+import { reportError } from "../functions/helpers";
 
 import { computeTokenIdentifier, toHexString } from "../functions/account";
 
@@ -17,10 +18,6 @@ export const ChatAppContext = createContext();
 
 
 //// TODO
-//// ADD PROJECTS' NFTs COLLECTIONS
-//// REPLACE openSuccessPanel WITH openSuccessPanelAppManagement ON EVERY SUCCESS CALL WITH THE APP MANAGEMENT
-//// VERSIONS; NEWS; CREATE/UPDATE APP
-//// DELETE VERSION + DELETE COLLECTION
 //// UPDATE COLLECTION WHEN RECEIVED AGAIN BY THE SAME USER WHO REGISTERED IT
 
 
@@ -400,8 +397,6 @@ const ChatICAppProvider = ({ children }) => {
 
   const getGroupData = async (idGroup) => {
     if(currentSection === 0){
-      console.log("CHAT SELECTED");
-      console.log(chatSelected);
       let nameGroup;
       if(chatSelected.isDirect === true){
         let _userOwner     = (chatSelected.name.split(" ")[0].toUpperCase() === username.toUpperCase()) ? 1 : 0;
@@ -590,7 +585,6 @@ const ChatICAppProvider = ({ children }) => {
         avatarGroup = chatSelected.avatar;
       }
       _msgUnity = "{\"data\":" + JSON.stringify(_msgUnity) + ", \"nameGroup\":\"" + nameGroup + "\", \"avatarGroup\":\"" + avatarGroup + "\", \"idGroup\":" + parseInt(chatSelected.groupID) + ", \"role\":" + _userRole + "}";
-      console.log("_msgUnity", _msgUnity);
       if(unityApp !== null){
         unityApp.send("Chat_Section", "GetChatMessages", _msgUnity);
       }
@@ -1434,10 +1428,6 @@ const ChatICAppProvider = ({ children }) => {
     if(newReport === true){
       openSuccessPanel();
     }
-  }
-
-  const reportError = (text, err) => {
-    console.log(text, err);
   }
 
 

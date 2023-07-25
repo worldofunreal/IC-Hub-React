@@ -12,6 +12,7 @@ import "./styles/main.css";
 import { AccountIdentifier, LedgerCanister } from "@dfinity/nns";
 import Lottie from "lottie-react";
 import loadingAnim from "./resources/loading_anim/hubanim.json";
+import { reportError } from './functions/helpers';
 
 import { idlFactory as mintIDL } from './chatSDK/nfts_ichub';
 
@@ -86,7 +87,7 @@ export default function App(props){
                 host: "https://fbbjb-oyaaa-aaaah-qaojq-cai.raw.ic0.app/"
             })
         } catch(err){
-            console.log("Not able to init Usergeek:", err);
+            reportError("Not able to init Usergeek:", err);
         }
     };
 
@@ -96,7 +97,7 @@ export default function App(props){
             Usergeek.trackSession();
             setUsergeekInitialized(true);
         } catch(err){
-            console.log("Not able to track Usergeek:", err);
+            reportError("Not able to track Usergeek:", err);
         }
     };
 
@@ -182,7 +183,7 @@ export default function App(props){
                     setUsergeekPrincipal(await _StoicI.getPrincipal());
                     break;
                 default:
-                    console.log("WALLET SELECTED:", _wallet);
+                    reportError("WALLET SELECTED:", _wallet);
                     alert("ERROR SELECTING WALLET");
                     window.location.reload();
                     break;
@@ -255,7 +256,7 @@ export default function App(props){
                 let _accID  = await canister.mySubaccount();
                 setUserAccountID(_accID);
             } catch(err){
-                console.log("ERR mySubaccount", err);
+                reportError("ERR mySubaccount", err);
             }
         }
 
@@ -330,7 +331,7 @@ export default function App(props){
                 setCanister(_can);
             })()
             } catch(e){
-                console.log("IW E", e);
+                reportError("IW E", e);
                 alert("Your Wallet session has expired. Please login again in their app and then reload this page");
             }
         };
@@ -359,18 +360,15 @@ export default function App(props){
             //     const _accID = AccountIdentifier.fromHex(getAccountId(userPrincipal, null));
 
             //     // let _p = Principal.fromText(userPrincipal.toString());//.toUint8Array();
-            //     // console.log("_p", _p);
             //     // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
             //     // const accountIdentifier = AccountIdentifier.fromPrincipal({ _p });
-            //     // console.log("WILL GET NEW ICP", accountIdentifier, "-");
             //     // /*const accountIdentifier = AccountIdentifier.fromHex(
             //     //     "acedcf79daec4cb86dd7b44c53dd5111a81a006d26a63b8dd5e822b6fd711ad5"
             //     // );*/
             //     const _newICP = await ledger.accountBalance( _accID );
             //     // //const _newICP = await ledger.accountBalance( AccountIdentifier.fromPrincipal({principal: userPrincipal, subAccount: null}) , false);
-            //     console.log("NEW ICP", _newICP);
             // }catch(err){
-            //     console.log("ERR ", err);
+            //     reportError("ERR ", err);
             // }
             let icp_dec = parseFloat(parseInt(_icp.e8s)) / 100000000;
             let _tokens = JSON.stringify({
@@ -398,7 +396,7 @@ export default function App(props){
                 _to = Principal.fromText(to);
                 _isPrincipal = true;
             } catch(err){
-                console.log("Not a principal");
+                reportError("Not a principal", err);
             }
             if(_isPrincipal === true){
                 _accID = fromHexString(getAccountId(_to, null));
@@ -408,7 +406,7 @@ export default function App(props){
                         openSuccessPanel();
                     }
                 } catch(err){
-                    console.log("ERROR WHILE SENDING ICP", err);
+                    reportError("ERROR WHILE SENDING ICP", err);
                     alert("ERROR WHILE SENDING ICP, PLEASE CHECK THE ADDRESS AND AMOUNT AND TRY AGAIN");
                 }
             } else {
@@ -421,11 +419,11 @@ export default function App(props){
                     openSuccessPanel();
                 }
             } catch(err){
-                console.log("ERROR WHILE SENDING ICP", err);
+                reportError("ERROR WHILE SENDING ICP", err);
                 alert("ERROR WHILE SENDING ICP, PLEASE CHECK THE ADDRESS AND AMOUNT AND TRY AGAIN");
             }
         } else {
-            console.log("INVALID AMOUNT");
+            reportError("INVALID AMOUNT", null);
             alert("INVALID AMOUNT");
         }
     }
@@ -470,7 +468,6 @@ export default function App(props){
         };
 
         unityContext.on("SetAvatarURL", (_url) => {
-            console.log("SetAvatarURL", _url);
             saveUserImage(_url);
         });
 
@@ -481,7 +478,6 @@ export default function App(props){
                 _uImg = await canister.setImageToUser(img, { "url": null });
                 await setImageToUser(img);
             }
-            console.log("_uImg", _uImg);
             unityContext.send("Canvas","OnAvatarReady", "");
         };
 
@@ -509,7 +505,7 @@ export default function App(props){
         if(_requested[0] === true){
             openSuccessPanel();
         } else {
-            console.log("Error while trying to add user to group", _requested[1]);
+            reportError("Error while trying to add user to group", _requested[1]);
             alert("Error while trying to add user to group");
         }
     };
@@ -600,14 +596,12 @@ export default function App(props){
     });
 
     unityContext.on("SetAvatarToGroup", () => {
-        console.log("OPEN SetAvatarToGroup");
         setImageLoadingSection("SetAvatarToGroup");
         openUploadImageProfile();
     });
 
     /// Tokens
     unityContext.on("SendCrypto", (json) => {
-        console.log("DATA NFT SEND", json);
         let _data = JSON.parse(json);
         if(_data.isToken === false){
             /// NFT
@@ -633,11 +627,9 @@ export default function App(props){
     //// Pk#1234 (Plug)  4fec8917ffd42657c22e82a59eb9ae9f48b8503125811059fc5bffd4c72c6d1f
     //// Pk#4321 (Stoic) fbaab62eb1b779036e885fa186b1abcba2e63571cd50de5ebdf209c79cd0113f
 
-    
 
     const readFile = async (files) => {
         let file = files[0];
-        window.removeEventListener('focus', handleFocusBack);
         if(file.size > chunkSize){
             alert("File too big. Max size is 2 MB");
             return false;
@@ -668,7 +660,6 @@ export default function App(props){
         let _u = await canisterImages.saveImage([...new Uint8Array(await file.arrayBuffer())], file.type);
         let urlImage = "https://" + canisterImagesId + ".raw.ic0.app/img=" + _u[1];
 
-        console.log("Image", urlImage);
         switch(imageLoadingSection){
             case null:
                 break;
@@ -745,41 +736,26 @@ export default function App(props){
         addReport(JSON.parse(json));
     });
 
-    /// Input callback
-    const addCallback = () => {
-        window.addEventListener('focus', handleFocusBack);
-    }
-
-    const handleFocusBack = () => {
-        console.log("CLOSE POPUP");
-        window.removeEventListener('focus', handleFocusBack);
-    }
-
     /// APPS VERSIONS
     unityContext.on("SendDataVersions", (json) => {
-        console.log("SAVE VERSION", json);
         saveAppVersions(JSON.parse(json));
     });
 
     unityContext.on("DeleteVersion", (versionID) => {
-        console.log("DELETE VERSION", versionID);
         deleteVersion(versionID);
     });
 
     /// NFTs Collections
     unityContext.on("SetAvatarImageToCollection", (objectName) => {
-        console.log("OBJECT TO RETURN IMAGE TO", objectName);
         setImageLoadingSection(objectName);
         openUploadImageProfile();
     });
 
     unityContext.on("SendDataCollections", (json) => {
-        console.log("SAVE COLLECTIONS", json);
         saveNFTCollection(JSON.parse(json));
     });
 
     unityContext.on("DeleteCollection", (collectionID) => {
-        console.log("DELETE", collectionID);
         deleteCollection(collectionID);
     });
 

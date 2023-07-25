@@ -8,17 +8,12 @@ import { idlFactory as imagesIDL       } from "./images";
 import { idlFactory as extIDL          } from "./nfts_ichub";
 import { idlFactory as standardsIDL    } from "./nfts_standards";
 import { idlFactory as reportsIDL      } from "./reports";
-//import { idlFactory as idlExt } from "../../../declarations/ext_token/score_token.did";
 import { getAccountId } from "../functions/account";
 import { reportError } from "../functions/helpers";
 
 import { computeTokenIdentifier, toHexString } from "../functions/account";
 
 export const ChatAppContext = createContext();
-
-
-//// TODO
-//// UPDATE COLLECTION WHEN RECEIVED AGAIN BY THE SAME USER WHO REGISTERED IT
 
 
 /*
@@ -935,21 +930,21 @@ const ChatICAppProvider = ({ children }) => {
 
   const getUnityStatusEquivalent = (_id) => {
     switch(_id.toUpperCase()){
-      case "AVALIABLE"       : return 0;
+      case "AVAILABLE"       : return 0;
       case "DO NOT DISTURBE" : return 1;
       case "AWAY"            : return 2;
       case "OFFLINE"         : return 3;
-      default                : return 3;
+      default                : return 0;
     }
   };
 
   const getActivityEquivalent = (_id) => {
     switch(_id){
-      case 0: return "Avaliable";
+      case 0: return "Available";
       case 1: return "Do not disturbe";
       case 2: return "Away";
       case 3: return "Offline";
-      default: return _id;
+      default: return "Available";
     }
   };
 
@@ -1000,6 +995,7 @@ const ChatICAppProvider = ({ children }) => {
     let _data = {
       id               : 0,
       name             : data.name,
+      description      : data.description,
       appCategoryIndex : data.category,
       logo             : data.Logo,
       banner           : data.Banner,
@@ -1018,11 +1014,12 @@ const ChatICAppProvider = ({ children }) => {
     if(_prevData !== null && _prevData.length > 0){
       let _saveData = await projectsCanister.updateProject(parseInt(_prevData[0].id), _data);
       if(_saveData[0] === true){
-        openSuccessPanelAppManagement(); //// THIS MAY CHANGE; CHECK WITH SHIZUKEN
+        openSuccessPanelAppManagement();
       }
     } else {
       let _createData = await projectsCanister.createProject(_data);
       if(_createData[0] === true){
+        await getUserProjectData();
         openSuccessPanelAppManagement();
       }
     }
@@ -1045,6 +1042,7 @@ const ChatICAppProvider = ({ children }) => {
     if(_prevData !== undefined && _prevData !== null && _prevData.length > 0){
       let _data = {
         name           : _prevData[0].name,
+        description    : _prevData[0].description,
         category       : parseInt(_prevData[0].appCategoryIndex),
         linkDapp       : _prevData[0].launchLink,
         nftCollections : _prevData[0].nftCollections.collections,
@@ -1058,7 +1056,7 @@ const ChatICAppProvider = ({ children }) => {
         Logo           : _prevData[0].logo,
       }
       let _versionData = [];
-      if(_versions !== undefined && _versions !== null && _versions[0].length > 0){
+      if(_versions !== undefined && _versions !== null && _versions[0] !== undefined && _versions[0].length > 0){
         for(let i = 0; i < _versions[0].length; i++){
           if(parseInt(_versions[0][i].versionID) !== NaN){
             _versionData.push({
@@ -1160,6 +1158,7 @@ const ChatICAppProvider = ({ children }) => {
       let _p = {
         "id": parseInt(p.id),
         "name": p.name,
+        "description" : p.description,
         "appCategoryIndex": parseInt(p.appCategoryIndex),
         "logo": p.logo,
         "banner": p.banner,
@@ -1219,6 +1218,15 @@ const ChatICAppProvider = ({ children }) => {
           _can = await setCanisterExternalPlug(standardsIDL, canisterNFTsCollections);
           setNFTsCollCanister(_can);
           break;
+        case "InfinityWallet":
+          _can = await setCanisterExternalIW(standardsIDL, canisterNFTsCollections);
+          break;
+        case "IdentityWallet":
+          _can = await setCanister(standardsIDL, canisterNFTsCollections);
+          break;
+        case "StoicWallet":
+          _can = await setCanister(standardsIDL, canisterNFTsCollections);
+          break;
       };
     } else {
       _can = nftsCollCanister;
@@ -1255,6 +1263,15 @@ const ChatICAppProvider = ({ children }) => {
           case "PlugWallet":
             _can = await setCanisterExternalPlug(extIDL, extCanisters[i]);
             break;
+          case "InfinityWallet":
+            _can = await setCanisterExternalIW(extIDL, extCanisters[i]);
+            break;
+          case "IdentityWallet":
+            _can = await setCanister(extIDL, extCanisters[i]);
+            break;
+          case "StoicWallet":
+            _can = await setCanister(extIDL, extCanisters[i]);
+            break;
         };
         try{
           let _assets = await _can.getRegistry();
@@ -1264,14 +1281,15 @@ const ChatICAppProvider = ({ children }) => {
             for(let j = 0; j < _assets.length; j++){
               if(_assets[j][1] === _userAcc){
                 let _tid = computeTokenIdentifier(extCanisters[i], _assets[j][0]);
-                let _url = `https://${extCanisters[i]}.raw.ic0.app/&tokenid=${_tid}`;
-                /*let _r = await fetch(_url);
+                //let _url = `https://${extCanisters[i]}.raw.ic0.app/&tokenid=${_tid}`;
+                let _url = `https://${extCanisters[i]}.raw.icp0.io/&tokenid=${_tid}`;
+                let _r = await fetch(_url);
                 let _i = await _r.text();
                 if(_i.includes("<image href=\"https:")){
                   let _s1 = _i.split("<image href=\"https:");
                   let _s2 = _s1[1].split("\"");
                   _url = _s2[0];
-                }*/
+                }
                 _thisCollectionNFTs.push({
                   nftName   : _thisNftCollData.name + " #" + (parseInt(j) + 1).toString(),
                   nftAvatar : _url,
@@ -1292,7 +1310,7 @@ const ChatICAppProvider = ({ children }) => {
             }
             if(_thisCollectionNFTs.length > 0){
               _userNfts.push({
-                avatar         : "",
+                avatar         : _thisNftCollData.avatarURL,
                 colectionName  : _thisNftCollData.name,
                 marketplaceURL : _thisNftCollData.marketplace,
                 canisterID     : _thisNftCollData.canisterID.toString(),
@@ -1410,6 +1428,15 @@ const ChatICAppProvider = ({ children }) => {
         case "PlugWallet":
           _can = await setCanisterExternalPlug(reportsIDL, reportsCanisterId);
           setReportsCanister(_can);
+          break;
+        case "InfinityWallet":
+          _can = await setCanisterExternalIW(reportsIDL, reportsCanisterId);
+          break;
+        case "IdentityWallet":
+          _can = await setCanister(reportsIDL, reportsCanisterId);
+          break;
+        case "StoicWallet":
+          _can = await setCanister(reportsIDL, reportsCanisterId);
           break;
       };
     } else {

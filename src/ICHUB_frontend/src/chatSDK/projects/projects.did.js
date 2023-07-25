@@ -15,6 +15,7 @@ export const idlFactory = ({ IDL }) => {
     'logo' : IDL.Text,
     'name' : IDL.Text,
     'banner' : IDL.Text,
+    'description' : IDL.Text,
     'dscvrPortal' : IDL.Text,
     'catalyze' : IDL.Text,
     'distrikt' : IDL.Text,

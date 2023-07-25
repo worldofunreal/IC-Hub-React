@@ -9,6 +9,7 @@ export interface ProjectData {
   'logo' : string,
   'name' : string,
   'banner' : string,
+  'description' : string,
   'dscvrPortal' : string,
   'catalyze' : string,
   'distrikt' : string,

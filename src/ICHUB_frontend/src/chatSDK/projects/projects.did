@@ -43,6 +43,7 @@ type ProjectData =
    blockchain: text;
    catalyze: text;
    currentVersion: text;
+   description: text;
    distrikt: text;
    dscvrPortal: text;
    id: nat;

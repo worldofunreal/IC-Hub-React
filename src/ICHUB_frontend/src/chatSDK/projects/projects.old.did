@@ -45,6 +45,7 @@ type NFTsCollections = record {collections: vec text;};
 service : {
   addNewsToProject: (ProjectNews) -> (bool, text);
   createProject: (ProjectData) -> (bool, text);
+  deleteVersion: (nat) -> (bool, text);
   getAllProjects: () -> (vec ProjectFullData) query;
   getMyProject: () -> (opt ProjectData) query;
   getMyProjectNews: () -> (opt vec ProjectNews) query;

@@ -605,7 +605,7 @@ const ChatICAppProvider = ({ children }) => {
         return list[i][1];
       }
     }
-    return "https://cdn3.iconfinder.com/data/icons/delivery-and-logistics/24/logistics-25-512.png";
+    return "https://avnm2-3aaaa-aaaaj-qacba-cai.raw.ic0.app/img=2177887202";
   }
 
   const updateMessages = (_counter) => {
@@ -724,6 +724,12 @@ const ChatICAppProvider = ({ children }) => {
       if(groupID > 1){
         let _core = await chatCoreCanister.remove_user_from_group(userPrincipal, groupID);
       }
+    };
+
+    const removeUserFromGroup = async (userID, groupID) => {
+      let _core = await chatCoreCanister.remove_user_from_group(userID, groupID);
+      console.log("Removed", _core);
+      openSuccessPanel();
     };
 
     const getGroupUsers = async () => {
@@ -1190,7 +1196,7 @@ const ChatICAppProvider = ({ children }) => {
   };
 
   const getLinkHttps = (link) => {
-    return (link.split("https://").length > 1) ? link : "https://" + link;
+    return (link !== null && link !== "") ? (link.split("https://").length > 1) ? link : "https://" + link : link;
   }
 
   const getIsFavorite = (id, favs) => {
@@ -1236,8 +1242,6 @@ const ChatICAppProvider = ({ children }) => {
     let _list = _coll.map((c) => {
       return c[0].toString();
     });
-    //_list.push(canisterNFTsICHUB);
-    //_list.push("tnvo7-iaaaa-aaaah-qcy4q-cai");
     setExtCanisters(_list);
   }
 
@@ -1459,8 +1463,8 @@ const ChatICAppProvider = ({ children }) => {
 
 
   const value = { setUnityApp, setWalletSelected, setCoreCanisterExternal, userPrincipal, setUserPrincipal, setIdentityChat, 
-                  setUsername, searchGroup, createGroup, addUserToGroup, selectChat, leaveGroup, userGroups, 
-                  requestJoinGroup, getGroupUsers, transferOwner, acceptGroupRequest, rejectGroupRequest, 
+                  setUsername, searchGroup, createGroup, addUserToGroup, selectChat, leaveGroup, userGroups, chatCoreCanister,
+                  requestJoinGroup, getGroupUsers, transferOwner, acceptGroupRequest, rejectGroupRequest, getGroupData,
                   changeGroupDescription, changeGroupTitle, changeGroupPrivacy, getUserDataFromID, getUserFriends,
                   getUserPendingNotifications, acceptFriendRequest, rejectFriendRequest, messageUser, requestFriendship,
                   setUserdataHub, logUserActivity, searchUsers, changeUserDescription, setImageToUser,
@@ -1468,7 +1472,7 @@ const ChatICAppProvider = ({ children }) => {
                   setCurrentSection, nftList, addNFTCollection, transferNft, addReport, openSuccessPanel, 
                   getProjectsCanister, projectsCanister, userAccountID, setUserAccountID, saveNFTCollection,
                   walletSelected, setCanisterExternalPlug, setCanisterExternalIW, setCanisterExternal, deleteCollection, 
-                  deleteVersion, saveAppVersions};
+                  deleteVersion, saveAppVersions, removeUserFromGroup};
 
   return <ChatAppContext.Provider value={value}>{children}</ChatAppContext.Provider>;
 };

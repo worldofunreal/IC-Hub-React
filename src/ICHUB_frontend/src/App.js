@@ -52,20 +52,24 @@ export default function App(props){
           saveSession, setSaveSession } = useContext(AppContext);
     /// Functions from the Chat context
     let { setUnityApp, setWalletSelected, setCoreCanisterExternal, userPrincipal, setUserPrincipal, setIdentityChat, setUsername, 
-            searchGroup, createGroup, selectChat, leaveGroup, requestJoinGroup, acceptGroupRequest, rejectGroupRequest, 
-            changeGroupTitle, changeGroupDescription, changeGroupPrivacy, getUserDataFromID, getUserFriends, 
+            searchGroup, createGroup, selectChat, leaveGroup, requestJoinGroup, acceptGroupRequest, rejectGroupRequest, getGroupData,
+            changeGroupTitle, changeGroupDescription, changeGroupPrivacy, getUserDataFromID, getUserFriends, chatCoreCanister,
             getUserPendingNotifications, setUserdataHub, acceptFriendRequest, rejectFriendRequest, messageUser, 
             requestFriendship, logUserActivity, searchUsers, changeUserDescription, setImageToUser, checkUserActivity,
             getTokens, saveDataApp, canisterImages, canisterImagesId, saveNews, setCurrentSection, nftList, addNFTCollection,
             transferNft, addReport, openSuccessPanel, userAccountID, setUserAccountID, getProjectsCanister, projectsCanister,
             saveNFTCollection, walletSelected, setCanisterExternalPlug, setCanisterExternalIW, setCanisterExternal, deleteCollection,
-            deleteVersion, saveAppVersions
+            deleteVersion, saveAppVersions, removeUserFromGroup
         } = useContext(ChatAppContext);
     /// Local variables
     const [usergeekInitialized, setUsergeekInitialized] = useState(false);
-    const [balance, setBalance] = useState(0);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [balance,             setBalance]             = useState(0);
+    const [isLoaded,            setIsLoaded]            = useState(false);
     const [imageLoadingSection, setImageLoadingSection] = useState(null);
+    const [changeChatAvatarID,  setChangeChatAvatarID]  = useState(null);
+
+    const [principalToDistribute, setPrincipalToDistribute] = useState(null);
+    const [amountToDistribute,    setAmountToDistribute]    = useState(null);
 
     ///////// INITIALIZE /////////
     useEffect(() => {
@@ -264,7 +268,7 @@ export default function App(props){
             /// Tokens
             let _tokens = JSON.stringify({
                 data : [{
-                    avatar : "https://logos-download.com/wp-content/uploads/2022/01/Internet_Computer_Logo.png",
+                    avatar : "https://avnm2-3aaaa-aaaaj-qacba-cai.raw.ic0.app/img=2256157988",
                     name   : "ICP",
                     value  : "Loading...",
                     id     : "ICP",
@@ -373,7 +377,7 @@ export default function App(props){
             let icp_dec = parseFloat(parseInt(_icp.e8s)) / 100000000;
             let _tokens = JSON.stringify({
                 data : [{
-                    avatar : "https://logos-download.com/wp-content/uploads/2022/01/Internet_Computer_Logo.png",
+                    avatar : "https://avnm2-3aaaa-aaaaj-qacba-cai.raw.ic0.app/img=2256157988",
                     name   : "ICP",
                     value  : icp_dec,
                     id     : 1,
@@ -565,6 +569,13 @@ export default function App(props){
         createGroup(_data);
     });
 
+    unityContext.on("SetAvatarImageFromGroupSettings", (groupID) => {
+        setChangeChatAvatarID(groupID);
+        setImageLoadingSection("SetAvatarImageFromGroupSettings");
+        openUploadImageProfile();
+    });
+    useEffect(() => {}, [changeChatAvatarID]);
+
     /// CHANGE USER DATA
     unityContext.on("ChangeDescriptionUser", (newDescription) => {
         changeUserDescription(newDescription);
@@ -600,6 +611,12 @@ export default function App(props){
         openUploadImageProfile();
     });
 
+    /// Remove users
+    unityContext.on("KickUser", (json) => {
+        let _data = JSON.parse(json);
+        removeUserFromGroup(Principal.fromText(_data.userPrincipalID), _data.idGroup);
+    })
+
     /// Tokens
     unityContext.on("SendCrypto", (json) => {
         let _data = JSON.parse(json);
@@ -623,9 +640,6 @@ export default function App(props){
         */
     })
 
-
-    //// Pk#1234 (Plug)  4fec8917ffd42657c22e82a59eb9ae9f48b8503125811059fc5bffd4c72c6d1f
-    //// Pk#4321 (Stoic) fbaab62eb1b779036e885fa186b1abcba2e63571cd50de5ebdf209c79cd0113f
 
 
     const readFile = async (files) => {
@@ -651,6 +665,9 @@ export default function App(props){
                 break;
             case "SetAvatarToGroup":
                 unityContext.send("CreateGroup Panel", "OnAvatarUploadLoading", "");
+                break;
+            case "SetAvatarImageFromGroupSettings":
+                unityContext.send("SettingGroup Panel", "OnAvatarUploadLoading", "");
                 break;
             default:
                 /// Will receive an object's name to return URL to
@@ -687,6 +704,13 @@ export default function App(props){
                     setUserdataHub();
                     getUserDataFromID(userPrincipal.toString());
                 }
+                break;
+            case "SetAvatarImageFromGroupSettings":
+                let _gImg = await chatCoreCanister.changeGroupAvatar(changeChatAvatarID, urlImage);
+                getGroupData(changeChatAvatarID);
+                selectChat(changeChatAvatarID);
+                setChangeChatAvatarID(null);
+                unityContext.send("SettingGroup Panel", "OnAvatarUploadReady", "");
                 break;
             default:
                 /// Will receive an object's name to return URL to
@@ -783,9 +807,6 @@ export default function App(props){
             <div className='hide'>
                 <input type="file" id="new-file" accept="image/*" onChange={(e)=>{ readFile(e.target.files); }} />
             </div>
-            {/* <div>
-                <input type="file" id="new-file" accept="image/*" multiple onChange={(e)=>{ uploadNFTfile(e.target.files); }} />
-            </div> */}
         </>
     );
 };
